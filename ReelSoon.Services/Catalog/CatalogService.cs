@@ -79,6 +79,33 @@ internal sealed class CatalogService(
         }
     }
 
+    public async Task<Result<IReadOnlyList<CatalogTrailer>>> GetTrailersAsync(
+        MediaKind kind,
+        string externalId,
+        CancellationToken cancellationToken = default)
+    {
+        if (kind is not (MediaKind.Movie or MediaKind.TvShow))
+        {
+            return Result<IReadOnlyList<CatalogTrailer>>.Success([]);
+        }
+
+        if (!tmdb.IsConfigured)
+        {
+            return Result<IReadOnlyList<CatalogTrailer>>.Success([]);
+        }
+
+        try
+        {
+            var trailers = await tmdb.GetTrailersAsync(kind, externalId, cancellationToken);
+            return Result<IReadOnlyList<CatalogTrailer>>.Success(trailers);
+        }
+        catch (Exception ex) when (ex is CatalogRequestException || IsTransportFailure(ex, cancellationToken))
+        {
+            logger.LogWarning(ex, "Trailer lookup failed for {Kind} {Id}", kind, externalId);
+            return Result<IReadOnlyList<CatalogTrailer>>.Success([]);
+        }
+    }
+
     private async Task<IReadOnlyList<CatalogHit>> SearchTmdbAsync(MediaKind kind, string query, CancellationToken cancellationToken)
     {
         if (!tmdb.IsConfigured)

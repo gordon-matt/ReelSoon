@@ -77,6 +77,9 @@ public partial class ItemDrawer : IDisposable
     public EventCallback OnAddPreview { get; set; }
 
     [Parameter]
+    public IReadOnlyList<CatalogTrailer> Trailers { get; set; } = [];
+
+    [Parameter]
     public EventCallback OnShowManual { get; set; }
 
     private string query = string.Empty;

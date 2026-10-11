@@ -13,6 +13,12 @@ public interface ICatalogService
         CatalogSource source,
         string externalId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>YouTube and Vimeo trailers for a TMDB movie or series. Empty for games.</summary>
+    Task<Result<IReadOnlyList<CatalogTrailer>>> GetTrailersAsync(
+        MediaKind kind,
+        string externalId,
+        CancellationToken cancellationToken = default);
 }
 
 public interface ICatalogRefreshService

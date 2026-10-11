@@ -59,6 +59,24 @@ internal sealed class TmdbClient(HttpClient http, IOptions<CatalogOptions> optio
         return hit.Title.Length == 0 ? null : hit;
     }
 
+    public async Task<IReadOnlyList<CatalogTrailer>> GetTrailersAsync(
+        MediaKind kind,
+        string externalId,
+        CancellationToken cancellationToken)
+    {
+        if (kind is not (MediaKind.Movie or MediaKind.TvShow))
+        {
+            return [];
+        }
+
+        string path = kind == MediaKind.TvShow
+            ? $"tv/{Uri.EscapeDataString(externalId)}/videos"
+            : $"movie/{Uri.EscapeDataString(externalId)}/videos";
+
+        var payload = await GetAsync<TmdbVideos>(path, cancellationToken);
+        return MapTrailers(payload);
+    }
+
     private async Task<T?> GetAsync<T>(string relative, CancellationToken cancellationToken)
     {
         string key = Uri.EscapeDataString(options.Value.Tmdb.ApiKey);
@@ -99,6 +117,60 @@ internal sealed class TmdbClient(HttpClient http, IOptions<CatalogOptions> optio
     private static string? TmdbPoster(string? path) =>
         string.IsNullOrWhiteSpace(path) ? null : $"https://image.tmdb.org/t/p/w342{path}";
 
+    private static IReadOnlyList<CatalogTrailer> MapTrailers(TmdbVideos? payload)
+    {
+        if (payload is null)
+        {
+            return [];
+        }
+
+        var candidates = payload.Results
+            .Where(video => video.Type is "Trailer" or "Teaser")
+            .Select(video => (Video: video, Url: WatchUrl(video)))
+            .Where(pair => pair.Url is not null)
+            .ToList();
+
+        // TMDB files promo spots under type Trailer. Prefer clips whose name says trailer or teaser.
+        var named = candidates.Where(pair => IsTrailerName(pair.Video.Name)).ToList();
+        var chosen = named.Count > 0
+            ? named
+            : candidates.Where(pair => pair.Video.Official && pair.Video.Type == "Trailer").ToList();
+        if (chosen.Count == 0)
+        {
+            chosen = candidates.Where(pair => pair.Video.Type == "Trailer").ToList();
+        }
+
+        return chosen
+            .OrderBy(pair => pair.Video.Type == "Trailer" ? 0 : 1)
+            .ThenBy(pair => pair.Video.Official ? 0 : 1)
+            .ThenBy(pair => pair.Video.Language == "en" ? 0 : 1)
+            .Take(5)
+            .Select(pair => new CatalogTrailer(
+                string.IsNullOrWhiteSpace(pair.Video.Name) ? pair.Video.Type ?? "Trailer" : pair.Video.Name.Trim(),
+                pair.Url!))
+            .ToList();
+    }
+
+    private static bool IsTrailerName(string? name) =>
+        name?.Contains("trailer", StringComparison.OrdinalIgnoreCase) == true
+        || name?.Contains("teaser", StringComparison.OrdinalIgnoreCase) == true;
+
+    private static string? WatchUrl(TmdbVideo video)
+    {
+        if (string.IsNullOrWhiteSpace(video.Key))
+        {
+            return null;
+        }
+
+        string key = Uri.EscapeDataString(video.Key);
+        return video.Site?.ToLowerInvariant() switch
+        {
+            "youtube" => $"https://www.youtube.com/watch?v={key}",
+            "vimeo" => $"https://vimeo.com/{key}",
+            _ => null,
+        };
+    }
+
     private sealed class TmdbPage
     {
         public List<TmdbTitle> Results { get; set; } = [];
@@ -127,5 +199,26 @@ internal sealed class TmdbClient(HttpClient http, IOptions<CatalogOptions> optio
 
         [JsonPropertyName("first_air_date")]
         public string? FirstAirDate { get; set; }
+    }
+
+    private sealed class TmdbVideos
+    {
+        public List<TmdbVideo> Results { get; set; } = [];
+    }
+
+    private sealed class TmdbVideo
+    {
+        public string? Name { get; set; }
+
+        public string? Key { get; set; }
+
+        public string? Site { get; set; }
+
+        public string? Type { get; set; }
+
+        public bool Official { get; set; }
+
+        [JsonPropertyName("iso_639_1")]
+        public string? Language { get; set; }
     }
 }

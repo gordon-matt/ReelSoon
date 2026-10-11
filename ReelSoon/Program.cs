@@ -1,19 +1,25 @@
 using Hangfire;
 using Hangfire.Dashboard;
+using LogVue;
 using ReelSoon.Components;
 using ReelSoon.Infrastructure;
 using ReelSoon.Services.Catalog;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.HttpOverrides;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddLogVue(options =>
+    builder.Configuration.GetSection(LogVueOptions.SectionName).Bind(options));
+
 builder.Services.AddSerilog((services, configuration) => configuration
     .MinimumLevel.Information()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
-    .WriteTo.Console());
+    .WriteTo.Console()
+    .WriteTo.LogVue(services));
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -81,6 +87,11 @@ app.UseAntiforgery();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapLogVue().RequireAuthorization(new AuthorizeAttribute
+{
+    Roles = ReelSoon.Constants.Roles.Administrator
+});
 
 app.UseHangfireDashboard("/hangfire", new DashboardOptions
 {

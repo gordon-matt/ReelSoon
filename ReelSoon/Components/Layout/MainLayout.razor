@@ -48,6 +48,20 @@
         </div>
 
         <div class="rs-sidebar-footer">
+            @if (isAdministrator)
+            {
+                @* Both sit outside the Blazor router, so they need a full navigation. *@
+                <nav class="rs-nav" aria-label="Administration">
+                    <a class="rs-nav-link" href="/hangfire" target="_blank" rel="noopener noreferrer">
+                        <Icon Name="jobs" />
+                        <span>Jobs</span>
+                    </a>
+                    <a class="rs-nav-link" href="/logvue" target="_blank" rel="noopener noreferrer">
+                        <Icon Name="logs" />
+                        <span>Logs</span>
+                    </a>
+                </nav>
+            }
             <div class="rs-user">
                 <strong>@userName</strong>
             </div>

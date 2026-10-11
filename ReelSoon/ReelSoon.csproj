@@ -3,6 +3,12 @@
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
+		<!--
+		  LogVue's dashboard needs the framework's blazor.web.js. The Web SDK only restores that
+		  file when this property is set on the host, and package props are not imported during
+		  restore, so it has to be set here.
+		-->
+		<RequiresAspNetWebAssets>true</RequiresAspNetWebAssets>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UserSecretsId>reelsoon-web-8c4a1e27-5b90-4d6f-a318-7e2c9b64d051</UserSecretsId>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
@@ -24,6 +30,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="LogVue" Version="1.0.0" />
 		<PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
 	</ItemGroup>
 

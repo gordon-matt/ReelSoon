@@ -488,10 +488,13 @@ h1, h2, h3, h4, p { margin-top: 0; }
     margin-bottom: 1rem;
     background: var(--rs-surface-2);
 }
+.rs-details-link { margin: 0 0 1rem; }
 .rs-facts { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); gap: 0.35rem 0.6rem; margin: 0 0 1rem; }
 .rs-facts dt { color: var(--rs-muted); }
 .rs-facts dd { margin: 0; }
 .rs-notes { white-space: pre-wrap; margin: 0; }
+.rs-trailers { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.rs-trailers a { display: inline-flex; align-items: center; gap: 0.35rem; }
 
 .rs-notify-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
 .rs-notify-item {

@@ -34,6 +34,7 @@ public partial class MainLayout : IAsyncDisposable
     private string searchText = string.Empty;
     private string userName = string.Empty;
     private bool showSignOut;
+    private bool isAdministrator;
     private WatchListCounts? counts;
     private int unreadCount;
     private PeriodicTimer? pollTimer;
@@ -48,6 +49,7 @@ public partial class MainLayout : IAsyncDisposable
         var state = await AuthState.GetAuthenticationStateAsync();
         userName = state.User.Identity?.Name ?? string.Empty;
         showSignOut = Auth.Provider != AuthProvider.None;
+        isAdministrator = state.User.IsInRole(Constants.Roles.Administrator);
 
         SyncSearchFromUri();
         await RefreshCountsAsync();

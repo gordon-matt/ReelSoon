@@ -42,7 +42,13 @@ public sealed record CatalogHit(
     string? Overview,
     DateOnly? ReleaseDate,
     string? ImageUrl,
-    string? LinkUrl);
+    string? LinkUrl)
+{
+    public IReadOnlyList<CatalogTrailer> Trailers { get; init; } = [];
+}
+
+/// <summary>A trailer or teaser that opens on YouTube or Vimeo.</summary>
+public sealed record CatalogTrailer(string Name, string Url);
 
 /// <summary>Result of adding a catalog hit. <see cref="AlreadyListed"/> means it was already on the list.</summary>
 public sealed record CatalogAdd(WatchItemDto Item, bool AlreadyListed);

@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.AspNetCore.WebUtilities;
 using ReelSoon.Components.Shared;
 using ReelSoon.Services.Catalog;
 
@@ -61,8 +63,15 @@ public partial class Watch : IDisposable
     private bool manual;
     private string? searchError;
     private int searchGeneration;
+    private int routeGeneration;
+    private int trailerGeneration;
+    private int? trailersForId;
+    private List<CatalogTrailer> trailers = [];
 
     private bool drawerOpen => creating || selected is not null;
+
+    private IReadOnlyList<CatalogTrailer> DrawerTrailers =>
+        preview is not null ? preview.Trailers : trailers;
 
     private DateOnly Today => DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
 
@@ -99,7 +108,23 @@ public partial class Watch : IDisposable
             ? $"Add a {kind.Singular().ToLowerInvariant()} and ReelSoon will tell you when it is out."
             : "Try a shorter title, or clear the search.";
 
-    protected override void OnInitialized() => Events.NotificationsChanged += OnNotified;
+    protected override void OnInitialized()
+    {
+        Events.NotificationsChanged += OnNotified;
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    /// <summary>
+    /// Movies, TV shows, and games are the same component. Blazor only calls
+    /// <see cref="OnParametersSetAsync"/> when a parameter changes, so a plain
+    /// /movies to /tv click updates the address bar and leaves the old list on screen.
+    /// </summary>
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) =>
+        InvokeAsync(async () =>
+        {
+            await SyncRouteAsync();
+            StateHasChanged();
+        });
 
     private void OnNotified() =>
         InvokeAsync(async () =>
@@ -110,21 +135,28 @@ public partial class Watch : IDisposable
             }
 
             await LoadAsync(loadedSearch);
-            ApplySelection();
+            ApplySelection(ReadRouteQuery().Id);
             StateHasChanged();
         });
 
-    public void Dispose() => Events.NotificationsChanged -= OnNotified;
-
-    protected override async Task OnParametersSetAsync()
+    public void Dispose()
     {
+        Events.NotificationsChanged -= OnNotified;
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
+
+    protected override Task OnParametersSetAsync() => SyncRouteAsync();
+
+    private async Task SyncRouteAsync()
+    {
+        int generation = Interlocked.Increment(ref routeGeneration);
         string path = Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0].Trim('/');
         if (!MediaKinds.TryFromRoute(path, out var next))
         {
             next = MediaKind.Movie;
         }
 
-        string? search = string.IsNullOrWhiteSpace(Query) ? null : Query.Trim();
+        var (search, selectedId) = ReadRouteQuery();
         bool listChanged = !loaded || next != kind || !string.Equals(search, loadedSearch, StringComparison.Ordinal);
 
         if (next != kind)
@@ -133,6 +165,9 @@ public partial class Watch : IDisposable
             creating = false;
             editing = false;
             selected = null;
+            trailers = [];
+            trailersForId = null;
+            items = [];
             ResetCatalogSearch();
         }
 
@@ -140,18 +175,43 @@ public partial class Watch : IDisposable
 
         if (listChanged)
         {
-            await LoadAsync(search);
+            // A second caller (location event plus parameter set) must still load.
+            // Committing the result is what the generation check below protects.
+            loaded = false;
+            await LoadAsync(search, generation);
         }
 
-        ApplySelection();
+        if (generation != routeGeneration)
+        {
+            return;
+        }
+
+        ApplySelection(selectedId);
+        await LoadTrailersAsync(selected);
     }
 
-    private async Task LoadAsync(string? search)
+    private (string? Search, int? Id) ReadRouteQuery()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = QueryHelpers.ParseQuery(uri.Query);
+        string? search = query.TryGetValue("q", out var term) && !string.IsNullOrWhiteSpace(term)
+            ? term.ToString().Trim()
+            : null;
+        int? id = query.TryGetValue("id", out var raw) && int.TryParse(raw, out int parsed) ? parsed : null;
+        return (search, id);
+    }
+
+    private async Task LoadAsync(string? search, int? generation = null)
     {
         loading = items.Count == 0;
         loadError = null;
 
         var listed = await WatchItems.ListAsync(kind, search);
+        if (generation is int token && token != routeGeneration)
+        {
+            return;
+        }
+
         loaded = true;
         loadedSearch = search;
 
@@ -167,14 +227,14 @@ public partial class Watch : IDisposable
         loading = false;
     }
 
-    private void ApplySelection()
+    private void ApplySelection(int? id)
     {
         if (creating)
         {
             return;
         }
 
-        if (SelectedId is not int id)
+        if (id is not int)
         {
             selected = null;
             editing = false;
@@ -327,10 +387,52 @@ public partial class Watch : IDisposable
             return;
         }
 
-        if (fresh.IsSuccess)
+        var chosen = fresh.IsSuccess ? fresh.Value : hit;
+        if (hit.Kind is MediaKind.Movie or MediaKind.TvShow)
         {
-            preview = fresh.Value;
+            var videos = await Catalog.GetTrailersAsync(hit.Kind, hit.ExternalId);
+            if (generation != previewGeneration)
+            {
+                return;
+            }
+
+            if (videos.IsSuccess)
+            {
+                chosen = chosen with { Trailers = videos.Value };
+            }
         }
+
+        preview = chosen;
+    }
+
+    private async Task LoadTrailersAsync(WatchItemDto? item)
+    {
+        if (item is null
+            || item.CatalogSource != CatalogSource.Tmdb
+            || item.Kind is not (MediaKind.Movie or MediaKind.TvShow)
+            || string.IsNullOrWhiteSpace(item.ExternalId))
+        {
+            trailers = [];
+            trailersForId = item?.Id;
+            return;
+        }
+
+        if (trailersForId == item.Id)
+        {
+            return;
+        }
+
+        int generation = Interlocked.Increment(ref trailerGeneration);
+        trailersForId = item.Id;
+        trailers = [];
+
+        var videos = await Catalog.GetTrailersAsync(item.Kind, item.ExternalId);
+        if (generation != trailerGeneration)
+        {
+            return;
+        }
+
+        trailers = videos.IsSuccess ? [.. videos.Value] : [];
     }
 
     private void BackToResults()
