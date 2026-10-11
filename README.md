@@ -37,44 +37,32 @@ Example stack. Fill in your own API keys and change the administrator password b
 ```yaml
 services:
   app:
-    build:
-      context: .
-      dockerfile: ReelSoon/Dockerfile
+    image: ghcr.io/gordon-matt/reelsoon:latest
+    container_name: ReelSoon
     ports:
-      - "8092:8080"
+      - "7017:8080"
     environment:
+      ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=reelsoon;Username=postgres;Password=<password>"
+      FileStorage__BasePath: /app/data
       Database__Provider: Npgsql
-      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=reelsoon;Username=postgres;Password=postgres"
-      Authentication__Provider: Identity
-      Seed__Admin__Email: "admin@reelsoon.local"
-      Seed__Admin__UserName: "admin"
-      Seed__Admin__Password: "change-me"
-      Catalog__Tmdb__ApiKey: ""
-      Catalog__Igdb__ClientId: ""
-      Catalog__Igdb__ClientSecret: ""
-    depends_on:
-      db:
-        condition: service_healthy
-
-  db:
-    image: postgres:18-alpine
-    ports:
-      - "5439:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: reelsoon
+      SeedAdmin__Email: <email>
+      SeedAdmin__Password: <password>
+      Catalog__Tmdb__ApiKey: "<api_key>"
+      Catalog__Igdb__ClientId: "<client_id>"
+      Catalog__Igdb__ClientSecret: "<client_secret>"
     volumes:
-      - reelsoon-pgdata:/var/lib/postgresql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - /volume1/docker/reelsoon:/app/data
+    networks:
+      - postgres-net
+      - keycloak-net
 
-volumes:
-  reelsoon-pgdata:
+networks:
+  postgres-net:
+    external: true
+  keycloak-net:
+    external: true
 ```
 
 ## Run without Docker
