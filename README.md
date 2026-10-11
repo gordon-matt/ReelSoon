@@ -8,7 +8,7 @@ It does not track what you have already watched, and it does not collect ratings
 
 <img src="https://github.com/gordon-matt/ReelSoon/blob/master/_Misc/Screenshots/Games.png" alt="Games" />
 
-<img src="https://github.com/gordon-matt/ReelSoon/blob/master/_Misc/Screenshots/Movies.png" alt="Movies" />
+<img src="https://github.com/gordon-matt/ReelSoon/blob/master/_Misc/Screenshots/Shows.png" alt="TV Shows" />
 
 ## What it does
 
