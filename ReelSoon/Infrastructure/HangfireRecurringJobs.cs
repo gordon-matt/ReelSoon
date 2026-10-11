@@ -11,7 +11,7 @@ public static class HangfireRecurringJobs
         RecurringJob.AddOrUpdate<ReleaseCheckJob>(
             "release-check",
             job => job.RunAsync(CancellationToken.None),
-            Cron.Minutely(),
+            Cron.Daily(5),
             new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
 
         RecurringJob.AddOrUpdate<CatalogRefreshJob>(

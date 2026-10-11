@@ -34,6 +34,9 @@ services:
       Seed__Admin__Email: "admin@reelsoon.local"
       Seed__Admin__UserName: "admin"
       Seed__Admin__Password: "${ADMIN_PASSWORD:-Admin123!}"
+      Catalog__Tmdb__ApiKey: "${TMDB_API_KEY:-}"
+      Catalog__Igdb__ClientId: "${IGDB_CLIENT_ID:-}"
+      Catalog__Igdb__ClientSecret: "${IGDB_CLIENT_SECRET:-}"
 
       # Authentication__Provider: Keycloak
       # Authentication__Keycloak__Authority: http://host.docker.internal:8081/realms/home
