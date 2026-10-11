@@ -1,4 +1,4 @@
-# ReelSoon
+<img src="https://github.com/gordon-matt/ReelSoon/blob/master/_Misc/Logo.png" alt="Logo" width="250" />
 
 ReelSoon is a self-hosted list of movies, TV shows, and games you want to know about when they come out. Search for a title, keep the poster and release date, and get a notification when that date arrives.
 
