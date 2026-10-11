@@ -65,7 +65,16 @@ public partial class ItemDrawer : IDisposable
     public EventCallback<string> OnSearch { get; set; }
 
     [Parameter]
-    public EventCallback<CatalogHit> OnPick { get; set; }
+    public EventCallback<CatalogHit> OnPreview { get; set; }
+
+    [Parameter]
+    public CatalogHit? Preview { get; set; }
+
+    [Parameter]
+    public EventCallback OnBack { get; set; }
+
+    [Parameter]
+    public EventCallback OnAddPreview { get; set; }
 
     [Parameter]
     public EventCallback OnShowManual { get; set; }
@@ -109,6 +118,11 @@ public partial class ItemDrawer : IDisposable
         debounce?.Cancel();
         debounce?.Dispose();
     }
+
+    private string PreviewStatusClass =>
+        Preview is null || Preview.ReleaseDate is null
+            ? "rs-badge-muted"
+            : ReleaseText.IsReleased(Preview.ReleaseDate, Today) ? "rs-badge-success" : "rs-badge-upcoming";
 
     private string StatusClass =>
         Item is null || Item.ReleaseDate is null

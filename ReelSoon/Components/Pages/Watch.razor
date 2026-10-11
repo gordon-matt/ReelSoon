@@ -66,14 +66,14 @@
         }
         else
         {
-            <div class="rs-list" role="list">
+            <div class="rs-grid" role="list">
                 @foreach (var item in visible)
                 {
                     <button type="button"
-                            class="rs-row @(selected?.Id == item.Id && !creating ? "is-selected" : null)"
+                            class="rs-card @(selected?.Id == item.Id && !creating ? "is-selected" : null)"
                             @onclick="() => Open(item)"
                             @key="item.Id">
-                        <span class="rs-row-art">
+                        <span class="rs-card-cover">
                             @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
                             {
                                 <img src="@item.ImageUrl" alt="" />
@@ -82,12 +82,10 @@
                             {
                                 <Icon Name="@item.Kind.Icon()" />
                             }
+                            <span class="rs-badge @StatusClass(item)">@ReleaseText.Status(item.ReleaseDate, Today)</span>
                         </span>
-                        <span class="rs-row-body">
-                            <span class="rs-row-title">@item.Title</span>
-                            <span class="rs-row-meta">@ReleaseText.Relative(item.ReleaseDate, Today)</span>
-                        </span>
-                        <span class="rs-badge @StatusClass(item)">@ReleaseText.Status(item.ReleaseDate, Today)</span>
+                        <span class="rs-card-title">@item.Title</span>
+                        <span class="rs-card-meta">@ReleaseText.Relative(item.ReleaseDate, Today)</span>
                     </button>
                 }
             </div>
@@ -111,7 +109,10 @@
                     Manual="manual"
                     CatalogLinked="selected?.CatalogSource is not null"
                     OnSearch="SearchCatalogAsync"
-                    OnPick="PickAsync"
+                    OnPreview="PreviewAsync"
+                    Preview="preview"
+                    OnBack="BackToResults"
+                    OnAddPreview="AddPreviewAsync"
                     OnShowManual="ShowManual"
                     OnClose="CloseDrawer"
                     OnEdit="BeginEdit"

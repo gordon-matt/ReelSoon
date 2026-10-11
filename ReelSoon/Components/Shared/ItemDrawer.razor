@@ -1,7 +1,12 @@
 <aside class="rs-details" aria-label="@(Creating ? "Add title" : Item?.Title)">
     <header class="rs-details-head">
         <div class="rs-details-title">
-            @if (Creating)
+            @if (Preview is not null)
+            {
+                <span class="rs-badge @PreviewStatusClass">@ReleaseText.Status(Preview.ReleaseDate, Today)</span>
+                <strong>@Preview.Title</strong>
+            }
+            else if (Creating)
             {
                 <span>New @Kind.Singular().ToLowerInvariant()</span>
             }
@@ -28,7 +33,51 @@
     </header>
 
     <div class="rs-details-body">
-        @if (Creating)
+        @if (Creating && Preview is not null)
+        {
+            @if (!string.IsNullOrWhiteSpace(Preview.ImageUrl))
+            {
+                <img class="rs-details-image" src="@Preview.ImageUrl" alt="" />
+            }
+
+            <dl class="rs-facts">
+                <dt>Release</dt>
+                <dd>
+                    @if (Preview.ReleaseDate is DateOnly releaseDate)
+                    {
+                        <span>@ReleaseText.Long(releaseDate)</span>
+                        <span class="rs-muted"> · @ReleaseText.Relative(releaseDate, Today)</span>
+                    }
+                    else
+                    {
+                        <span class="rs-muted">No date yet</span>
+                    }
+                </dd>
+                <dt>Source</dt>
+                <dd>@(Preview.Source == CatalogSource.Igdb ? "IGDB" : "TMDB")</dd>
+            </dl>
+
+            @if (!string.IsNullOrWhiteSpace(Preview.Overview))
+            {
+                <section>
+                    <h4>About</h4>
+                    <p class="rs-notes">@Preview.Overview</p>
+                </section>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(SearchError))
+            {
+                <p class="rs-validation" role="alert">@SearchError</p>
+            }
+
+            <div class="rs-form-actions">
+                <button type="button" class="rs-button" @onclick="OnBack" disabled="@Saving">Back</button>
+                <button type="button" class="rs-button rs-button-primary" @onclick="OnAddPreview" disabled="@Saving">
+                    @(Saving ? "Adding…" : "Add")
+                </button>
+            </div>
+        }
+        else if (Creating)
         {
             <div class="rs-field">
                 <label for="catalog-query">Search</label>
@@ -60,7 +109,7 @@
                 <div class="rs-catalog-results">
                     @foreach (var hit in Hits)
                     {
-                        <button type="button" class="rs-catalog-hit" @onclick="() => OnPick.InvokeAsync(hit)" disabled="@Saving" @key="hit.ExternalId">
+                        <button type="button" class="rs-catalog-hit" @onclick="() => OnPreview.InvokeAsync(hit)" disabled="@Saving" @key="hit.ExternalId">
                             <span class="rs-row-art">
                                 @if (!string.IsNullOrWhiteSpace(hit.ImageUrl))
                                 {
@@ -88,7 +137,7 @@
             }
         }
 
-        @if (Editing && (!Creating || Manual))
+        @if (Preview is null && Editing && (!Creating || Manual))
         {
             <EditForm Model="Form" OnValidSubmit="OnSave">
                 <DataAnnotationsValidator />
@@ -141,7 +190,7 @@
                 </div>
             </EditForm>
         }
-        else if (Item is not null)
+        else if (Preview is null && Item is not null)
         {
             @if (!string.IsNullOrWhiteSpace(Item.ImageUrl))
             {

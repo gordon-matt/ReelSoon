@@ -54,6 +54,8 @@ public partial class Watch : IDisposable
     private ConfirmDialog confirm = default!;
 
     private List<CatalogHit> hits = [];
+    private CatalogHit? preview;
+    private int previewGeneration;
     private bool searching;
     private bool searched;
     private bool manual;
@@ -272,6 +274,8 @@ public partial class Watch : IDisposable
         searched = false;
         manual = false;
         searchError = null;
+        preview = null;
+        previewGeneration++;
     }
 
     private async Task SearchCatalogAsync(string query)
@@ -310,6 +314,34 @@ public partial class Watch : IDisposable
 
         hits = [.. result.Value];
     }
+
+    private async Task PreviewAsync(CatalogHit hit)
+    {
+        int generation = ++previewGeneration;
+        preview = hit;
+        searchError = null;
+
+        var fresh = await Catalog.GetAsync(kind, hit.Source, hit.ExternalId);
+        if (generation != previewGeneration)
+        {
+            return;
+        }
+
+        if (fresh.IsSuccess)
+        {
+            preview = fresh.Value;
+        }
+    }
+
+    private void BackToResults()
+    {
+        previewGeneration++;
+        preview = null;
+        searchError = null;
+    }
+
+    private Task AddPreviewAsync() =>
+        preview is null ? Task.CompletedTask : PickAsync(preview);
 
     private async Task PickAsync(CatalogHit hit)
     {
