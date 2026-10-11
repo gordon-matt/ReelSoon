@@ -35,6 +35,7 @@ public sealed record WatchItemDto(
 
 /// <summary>A movie, series, or game returned by an online catalog search.</summary>
 public sealed record CatalogHit(
+    MediaKind Kind,
     CatalogSource Source,
     string ExternalId,
     string Title,

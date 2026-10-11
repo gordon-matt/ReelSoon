@@ -88,6 +88,7 @@ internal sealed class IgdbClient(
             : $"https://images.igdb.com/igdb/image/upload/t_cover_big/{game.Cover.ImageId}.jpg";
 
         return new CatalogHit(
+            MediaKind.Game,
             CatalogSource.Igdb,
             game.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
             CatalogText.Title(game.Name),

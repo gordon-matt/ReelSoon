@@ -19,7 +19,9 @@ internal sealed class CatalogService(
             return Result<IReadOnlyList<CatalogHit>>.Success([]);
         }
 
-        string cacheKey = $"catalog:{kind}:{term.ToLowerInvariant()}";
+        string cacheKey = kind == MediaKind.Game
+            ? $"catalog:game:{term.ToLowerInvariant()}"
+            : $"catalog:tmdb:{term.ToLowerInvariant()}";
         if (cache.TryGetValue(cacheKey, out IReadOnlyList<CatalogHit>? cached) && cached is not null)
         {
             return Result<IReadOnlyList<CatalogHit>>.Success(cached);
@@ -85,7 +87,7 @@ internal sealed class CatalogService(
                 "Movie and TV search needs a TMDB API key in Catalog:Tmdb:ApiKey. You can still add a title yourself.");
         }
 
-        return await tmdb.SearchAsync(kind, query, cancellationToken);
+        return await tmdb.SearchMultiAsync(query, cancellationToken);
     }
 
     private async Task<IReadOnlyList<CatalogHit>> SearchGamesAsync(string query, CancellationToken cancellationToken)

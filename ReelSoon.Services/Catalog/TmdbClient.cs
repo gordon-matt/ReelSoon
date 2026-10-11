@@ -14,12 +14,36 @@ internal sealed class TmdbClient(HttpClient http, IOptions<CatalogOptions> optio
 
     public bool IsConfigured => !string.IsNullOrWhiteSpace(options.Value.Tmdb.ApiKey);
 
-    public async Task<IReadOnlyList<CatalogHit>> SearchAsync(MediaKind kind, string query, CancellationToken cancellationToken)
+    /// <summary>
+    /// TMDB <c>/search/multi</c>, which is what Watcharr uses for a general search.
+    /// Movies and series are ranked together, so a series is not hidden behind a film-only query.
+    /// People and episodes are left out.
+    /// </summary>
+    public async Task<IReadOnlyList<CatalogHit>> SearchMultiAsync(string query, CancellationToken cancellationToken)
     {
-        string path = kind == MediaKind.TvShow ? "search/tv" : "search/movie";
-        var page = await GetAsync<TmdbPage>($"{path}?query={Uri.EscapeDataString(query)}", cancellationToken);
-        return page?.Results.Select(item => ToHit(kind, item, details: false)).Where(hit => hit.Title.Length > 0).ToList()
-            ?? [];
+        var page = await GetAsync<TmdbPage>($"search/multi?query={Uri.EscapeDataString(query)}", cancellationToken);
+        if (page is null)
+        {
+            return [];
+        }
+
+        var hits = new List<CatalogHit>();
+        foreach (var item in page.Results)
+        {
+            if (item.MediaType is not ("movie" or "tv"))
+            {
+                continue;
+            }
+
+            var kind = item.MediaType == "tv" ? MediaKind.TvShow : MediaKind.Movie;
+            var hit = ToHit(kind, item, details: false);
+            if (hit.Title.Length > 0)
+            {
+                hits.Add(hit);
+            }
+        }
+
+        return hits;
     }
 
     public async Task<CatalogHit?> GetAsync(MediaKind kind, string externalId, CancellationToken cancellationToken)
@@ -62,6 +86,7 @@ internal sealed class TmdbClient(HttpClient http, IOptions<CatalogOptions> optio
             : $"https://www.themoviedb.org/movie/{item.Id}";
 
         return new CatalogHit(
+            kind,
             CatalogSource.Tmdb,
             item.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
             title,
@@ -90,6 +115,9 @@ internal sealed class TmdbClient(HttpClient http, IOptions<CatalogOptions> optio
         public string? Overview { get; set; }
 
         public string? Homepage { get; set; }
+
+        [JsonPropertyName("media_type")]
+        public string? MediaType { get; set; }
 
         [JsonPropertyName("poster_path")]
         public string? PosterPath { get; set; }

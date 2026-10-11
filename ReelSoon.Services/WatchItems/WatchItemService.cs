@@ -121,6 +121,9 @@ public sealed class WatchItemService(
             return Result<CatalogAdd>.Invalid(new ValidationError(nameof(hit.Title), "That search result cannot be added."));
         }
 
+        // A combined search can return a series while the movies page is open. Store it as that kind.
+        kind = hit.Kind;
+
         var existing = await items.FindOneAsync(new SearchOptions<WatchItem>
         {
             Query = item => item.OwnerUserId == ownerUserId

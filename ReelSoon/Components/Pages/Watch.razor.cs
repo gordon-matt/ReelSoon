@@ -321,7 +321,7 @@ public partial class Watch : IDisposable
         preview = hit;
         searchError = null;
 
-        var fresh = await Catalog.GetAsync(kind, hit.Source, hit.ExternalId);
+        var fresh = await Catalog.GetAsync(hit.Kind, hit.Source, hit.ExternalId);
         if (generation != previewGeneration)
         {
             return;
@@ -357,13 +357,18 @@ public partial class Watch : IDisposable
             return;
         }
 
+        var saved = added.Value.Item;
         if (added.Value.AlreadyListed)
         {
-            Toasts.Show($"{added.Value.Item.Title} is already on your list.");
+            Toasts.Show($"{saved.Title} is already on your {saved.Kind.Label().ToLowerInvariant()}.");
+        }
+        else if (saved.Kind != kind)
+        {
+            Toasts.Success($"Added {saved.Title} to {saved.Kind.Label()}.");
         }
         else
         {
-            Toasts.Success($"Added {added.Value.Item.Title}.");
+            Toasts.Success($"Added {saved.Title}.");
         }
 
         Events.RaiseListsChanged();
@@ -371,8 +376,15 @@ public partial class Watch : IDisposable
         creating = false;
         editing = false;
         ResetCatalogSearch();
-        await LoadAsync(loadedSearch);
-        Navigation.NavigateTo(ItemUrl(added.Value.Item.Id));
+
+        if (saved.Kind == kind)
+        {
+            await LoadAsync(loadedSearch);
+            Navigation.NavigateTo(ItemUrl(saved.Id));
+            return;
+        }
+
+        Navigation.NavigateTo($"{saved.Kind.Route()}?id={saved.Id}");
     }
 
     private async Task SaveAsync()

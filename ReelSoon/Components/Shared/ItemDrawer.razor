@@ -53,6 +53,8 @@
                         <span class="rs-muted">No date yet</span>
                     }
                 </dd>
+                <dt>Type</dt>
+                <dd>@Preview.Kind.Singular()</dd>
                 <dt>Source</dt>
                 <dd>@(Preview.Source == CatalogSource.Igdb ? "IGDB" : "TMDB")</dd>
             </dl>
@@ -73,7 +75,7 @@
             <div class="rs-form-actions">
                 <button type="button" class="rs-button" @onclick="OnBack" disabled="@Saving">Back</button>
                 <button type="button" class="rs-button rs-button-primary" @onclick="OnAddPreview" disabled="@Saving">
-                    @(Saving ? "Adding…" : "Add")
+                    @(Saving ? "Adding…" : Preview.Kind == Kind ? "Add" : $"Add to {Preview.Kind.Label()}")
                 </button>
             </div>
         }
@@ -123,7 +125,8 @@
                             <span class="rs-catalog-copy">
                                 <strong>@hit.Title</strong>
                                 <span class="rs-muted">
-                                    @(hit.ReleaseDate is DateOnly date ? ReleaseText.Long(date) : "No date yet")
+                                    @hit.Kind.Singular()
+                                    · @(hit.ReleaseDate is DateOnly date ? ReleaseText.Long(date) : "No date yet")
                                 </span>
                             </span>
                         </button>

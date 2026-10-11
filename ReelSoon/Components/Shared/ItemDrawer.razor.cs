@@ -91,7 +91,7 @@ public partial class ItemDrawer : IDisposable
 
     private string SearchHint => Kind == MediaKind.Game
         ? "Results come from IGDB, including the cover and release date."
-        : "Results come from TMDB, including the poster and release date.";
+        : "Movies and TV shows are searched together, so a series is not hidden by a film with a similar name.";
 
     private async Task OnQueryInput(ChangeEventArgs args)
     {
