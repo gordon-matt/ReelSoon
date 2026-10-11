@@ -1,0 +1,12 @@
+global using System.Linq.Expressions;
+global using Ardalis.Result;
+global using Extenso.Data.Entity;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
+global using ReelSoon;
+global using ReelSoon.Data;
+global using ReelSoon.Data.Entities;
+global using ReelSoon.Models;
+global using ReelSoon.Services;
+global using ReelSoon.Services.Auth;

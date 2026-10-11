@@ -1,0 +1,77 @@
+@inherits LayoutComponentBase
+
+<div class="rs-app @(sidebarOpen ? "rs-sidebar-open" : null)">
+    <header class="rs-topbar">
+        <button type="button" class="rs-icon-button rs-menu-button" aria-label="Toggle sidebar" @onclick="ToggleSidebar">
+            <Icon Name="menu" />
+        </button>
+        <a class="rs-brand" href="/movies">
+            <img class="rs-logo" src="img/Logo.png" alt="ReelSoon" />
+        </a>
+        <form class="rs-search" @onsubmit="Search" @onsubmit:preventDefault="true">
+            <Icon Name="search" />
+            <input @bind="searchText" @bind:event="oninput" placeholder="Search this list" aria-label="Search this list" />
+        </form>
+        <div class="rs-topbar-actions">
+            <button type="button"
+                    class="rs-icon-button rs-bell @(notificationsOpen ? "is-open" : null)"
+                    aria-label="Notifications"
+                    aria-expanded="@notificationsOpen"
+                    @onclick="ToggleNotifications">
+                <Icon Name="bell" />
+                @if (unreadCount > 0)
+                {
+                    <span class="rs-badge-count">@(unreadCount > 9 ? "9+" : unreadCount.ToString())</span>
+                }
+            </button>
+            <button type="button" class="rs-icon-button" title="@(theme == "dark" ? "Light theme" : "Dark theme")" @onclick="ToggleThemeAsync">
+                <Icon Name="@(theme == "dark" ? "sun" : "moon")" />
+            </button>
+        </div>
+    </header>
+
+    <div class="rs-scrim" @onclick="CloseSidebar"></div>
+
+    <aside class="rs-sidebar">
+        <div>
+            <p class="rs-sidebar-heading">Watch lists</p>
+            <nav class="rs-nav">
+                @foreach (var kind in MediaKinds.All)
+                {
+                    <a class="rs-nav-link @(IsActive(kind) ? "is-active" : null)" href="@kind.Route()">
+                        <Icon Name="@kind.Icon()" />
+                        <span>@kind.Label()</span>
+                        <span class="rs-nav-count">@(counts?.For(kind).ToString() ?? "–")</span>
+                    </a>
+                }
+            </nav>
+        </div>
+
+        <div class="rs-sidebar-footer">
+            <div class="rs-user">
+                <strong>@userName</strong>
+            </div>
+            @if (showSignOut)
+            {
+                <form method="post" action="/auth/logout">
+                    <AntiforgeryToken />
+                    <button type="submit" class="rs-button rs-button-block">
+                        <Icon Name="logout" /> Sign out
+                    </button>
+                </form>
+            }
+        </div>
+    </aside>
+
+    <main class="rs-main">
+        @Body
+    </main>
+</div>
+
+@if (notificationsOpen)
+{
+    <div class="rs-drawer-scrim" @onclick="CloseNotifications"></div>
+    <NotificationDrawer OnClose="CloseNotifications" />
+}
+
+<Toaster />

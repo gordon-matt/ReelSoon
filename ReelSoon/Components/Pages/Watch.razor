@@ -1,0 +1,115 @@
+@page "/"
+@page "/movies"
+@page "/tv"
+@page "/games"
+@attribute [Authorize]
+
+<PageTitle>@kind.Label() — ReelSoon</PageTitle>
+
+<div class="rs-watch @(drawerOpen ? "rs-details-open" : null)">
+    <div class="rs-watch-main">
+        <div class="rs-page-header">
+            <div class="rs-page-header-bar">
+                <h1>@kind.Label()</h1>
+                <div class="rs-header-actions">
+                    <button type="button" class="rs-button rs-button-primary" @onclick="StartCreate">
+                        <Icon Name="plus" /> Add @kind.Singular().ToLowerInvariant()
+                    </button>
+                </div>
+            </div>
+            @if (!loading && loadError is null)
+            {
+                <p>@Summary</p>
+            }
+        </div>
+
+        @if (!loading && loadError is null && items.Count > 0)
+        {
+            <div class="rs-filters" role="tablist">
+                <button type="button" class="rs-chip @(filter == ListFilter.All ? "is-active" : null)" @onclick="() => filter = ListFilter.All">All</button>
+                <button type="button" class="rs-chip @(filter == ListFilter.Upcoming ? "is-active" : null)" @onclick="() => filter = ListFilter.Upcoming">Coming up</button>
+                <button type="button" class="rs-chip @(filter == ListFilter.Released ? "is-active" : null)" @onclick="() => filter = ListFilter.Released">Released</button>
+            </div>
+        }
+
+        @if (loading)
+        {
+            <p class="rs-muted">Loading…</p>
+        }
+        else if (loadError is not null)
+        {
+            <EmptyState IconName="alert" Title="This list could not be read">
+                @loadError
+            </EmptyState>
+        }
+        else if (items.Count == 0)
+        {
+            <EmptyState IconName="@kind.Icon()" Title="@EmptyTitle">
+                <p>@EmptyBody</p>
+                @if (string.IsNullOrWhiteSpace(Query))
+                {
+                    <button type="button" class="rs-button rs-button-primary" @onclick="StartCreate">
+                        <Icon Name="plus" /> Add @kind.Singular().ToLowerInvariant()
+                    </button>
+                }
+                else
+                {
+                    <a class="rs-button" href="@kind.Route()">Clear search</a>
+                }
+            </EmptyState>
+        }
+        else if (visible.Count == 0)
+        {
+            <EmptyState IconName="search" Title="Nothing in this filter">
+                <button type="button" class="rs-button" @onclick="() => filter = ListFilter.All">Show all</button>
+            </EmptyState>
+        }
+        else
+        {
+            <div class="rs-list" role="list">
+                @foreach (var item in visible)
+                {
+                    <button type="button"
+                            class="rs-row @(selected?.Id == item.Id && !creating ? "is-selected" : null)"
+                            @onclick="() => Open(item)"
+                            @key="item.Id">
+                        <span class="rs-row-art">
+                            @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                            {
+                                <img src="@item.ImageUrl" alt="" />
+                            }
+                            else
+                            {
+                                <Icon Name="@item.Kind.Icon()" />
+                            }
+                        </span>
+                        <span class="rs-row-body">
+                            <span class="rs-row-title">@item.Title</span>
+                            <span class="rs-row-meta">@ReleaseText.Relative(item.ReleaseDate, Today)</span>
+                        </span>
+                        <span class="rs-badge @StatusClass(item)">@ReleaseText.Status(item.ReleaseDate, Today)</span>
+                    </button>
+                }
+            </div>
+        }
+    </div>
+
+    @if (drawerOpen)
+    {
+        <ItemDrawer Kind="kind"
+                    Item="selected"
+                    Creating="creating"
+                    Editing="editing"
+                    Form="form"
+                    Today="Today"
+                    Saving="saving"
+                    Error="@formError"
+                    OnClose="CloseDrawer"
+                    OnEdit="BeginEdit"
+                    OnCancelEdit="CancelEdit"
+                    OnSave="SaveAsync"
+                    OnDelete="DeleteAsync" />
+    }
+</div>
+
+<ConfirmDialog @ref="confirm" />

@@ -1,0 +1,119 @@
+<aside class="rs-details" aria-label="@(Creating ? "Add title" : Item?.Title)">
+    <header class="rs-details-head">
+        <div class="rs-details-title">
+            @if (Creating)
+            {
+                <span>New @Kind.Singular().ToLowerInvariant()</span>
+            }
+            else if (Item is not null)
+            {
+                <span class="rs-badge @StatusClass">@ReleaseText.Status(Item.ReleaseDate, Today)</span>
+                <strong>@Item.Title</strong>
+            }
+        </div>
+        <div class="rs-details-actions">
+            @if (Item is not null && !Editing)
+            {
+                <button type="button" class="rs-icon-button" title="Edit" @onclick="OnEdit">
+                    <Icon Name="edit" />
+                </button>
+                <button type="button" class="rs-icon-button rs-danger-hover" title="Remove" @onclick="OnDelete">
+                    <Icon Name="trash" />
+                </button>
+            }
+            <button type="button" class="rs-icon-button" title="Close" @onclick="OnClose">
+                <Icon Name="x" />
+            </button>
+        </div>
+    </header>
+
+    <div class="rs-details-body">
+        @if (Editing)
+        {
+            <EditForm Model="Form" OnValidSubmit="OnSave">
+                <DataAnnotationsValidator />
+
+                @if (!string.IsNullOrWhiteSpace(Error))
+                {
+                    <p class="rs-validation" role="alert">@Error</p>
+                }
+
+                <div class="rs-field">
+                    <label for="title">Title</label>
+                    <InputText id="title" class="rs-input" @bind-Value="Form.Title" autofocus />
+                    <ValidationMessage For="() => Form.Title" class="rs-validation" />
+                </div>
+
+                <div class="rs-field">
+                    <label for="release">Release date</label>
+                    <InputDate id="release" class="rs-input" @bind-Value="Form.ReleaseDate" />
+                    <span class="rs-hint">Leave this empty if you don't know it yet. You'll be notified on this day.</span>
+                </div>
+
+                <div class="rs-field">
+                    <label for="notes">Notes</label>
+                    <InputTextArea id="notes" class="rs-textarea" @bind-Value="Form.Notes" />
+                    <ValidationMessage For="() => Form.Notes" class="rs-validation" />
+                </div>
+
+                <div class="rs-field">
+                    <label for="link">Link</label>
+                    <InputText id="link" class="rs-input" @bind-Value="Form.LinkUrl" placeholder="https://" />
+                    <ValidationMessage For="() => Form.LinkUrl" class="rs-validation" />
+                </div>
+
+                <div class="rs-field">
+                    <label for="image">Image URL</label>
+                    <InputText id="image" class="rs-input" @bind-Value="Form.ImageUrl" placeholder="https://" />
+                    <ValidationMessage For="() => Form.ImageUrl" class="rs-validation" />
+                </div>
+
+                <div class="rs-form-actions">
+                    <button type="button" class="rs-button" @onclick="OnCancelEdit" disabled="@Saving">Cancel</button>
+                    <button type="submit" class="rs-button rs-button-primary" disabled="@Saving">
+                        @(Creating ? "Add" : "Save")
+                    </button>
+                </div>
+            </EditForm>
+        }
+        else if (Item is not null)
+        {
+            @if (!string.IsNullOrWhiteSpace(Item.ImageUrl))
+            {
+                <img class="rs-details-image" src="@Item.ImageUrl" alt="" />
+            }
+
+            <dl class="rs-facts">
+                <dt>Release</dt>
+                <dd>
+                    @if (Item.ReleaseDate is DateOnly date)
+                    {
+                        <span>@ReleaseText.Long(date)</span>
+                        <span class="rs-muted"> · @ReleaseText.Relative(date, Today)</span>
+                    }
+                    else
+                    {
+                        <span class="rs-muted">No date yet</span>
+                    }
+                </dd>
+            </dl>
+
+            @if (!string.IsNullOrWhiteSpace(Item.Notes))
+            {
+                <section>
+                    <h4>Notes</h4>
+                    <p class="rs-notes">@Item.Notes</p>
+                </section>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Item.LinkUrl))
+            {
+                <p>
+                    <a class="rs-button" href="@Item.LinkUrl" target="_blank" rel="noopener noreferrer">
+                        <Icon Name="link" /> Open link
+                    </a>
+                </p>
+            }
+        }
+    </div>
+</aside>

@@ -1,0 +1,12 @@
+<Solution>
+  <Project Path="docker-compose.dcproj" Id="a7c3e1b4-6d28-4f90-9c15-2b8e4a71d063" />
+  <Project Path="ReelSoon.Core/ReelSoon.Core.csproj" />
+  <Project Path="ReelSoon.Data.MySql/ReelSoon.Data.MySql.csproj" />
+  <Project Path="ReelSoon.Data.Npgsql/ReelSoon.Data.Npgsql.csproj" />
+  <Project Path="ReelSoon.Data.Sql/ReelSoon.Data.Sql.csproj" />
+  <Project Path="ReelSoon.Data.Sqlite/ReelSoon.Data.Sqlite.csproj" />
+  <Project Path="ReelSoon.Data/ReelSoon.Data.csproj" />
+  <Project Path="ReelSoon.Models/ReelSoon.Models.csproj" />
+  <Project Path="ReelSoon.Services/ReelSoon.Services.csproj" />
+  <Project Path="ReelSoon/ReelSoon.csproj" />
+</Solution>

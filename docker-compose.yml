@@ -1,0 +1,80 @@
+# ReelSoon — app plus PostgreSQL.
+# Run from the repo root: docker compose up -d
+# App: http://localhost:8092
+#
+# Environment variables follow the .NET configuration convention: each JSON level in
+# appsettings is separated by a double underscore (Database:Provider -> Database__Provider).
+#
+# The defaults run the app against PostgreSQL with built-in ASP.NET Identity. To use Keycloak
+# instead, set Authentication__Provider=Keycloak, fill in Authentication__Keycloak__*, and
+# uncomment the keycloak service at the bottom of this file.
+#
+# Other database providers (set Database__Provider and ConnectionStrings__DefaultConnection):
+#   Sqlite     Data Source=/app/data/reelsoon.db
+#   SqlServer  Server=host;Database=reelsoon;User Id=sa;Password=...;TrustServerCertificate=True
+#   MySql      Server=host;Database=reelsoon;User=root;Password=...
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ReelSoon/Dockerfile
+    ports:
+      - "8092:8080"
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      Database__Provider: Npgsql
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=reelsoon;Username=postgres;Password=${POSTGRES_PASSWORD:-postgres}"
+      Authentication__Provider: Identity
+      Seed__Admin__Email: "admin@reelsoon.local"
+      Seed__Admin__UserName: "admin"
+      Seed__Admin__Password: "${ADMIN_PASSWORD:-Admin123!}"
+
+      # Authentication__Provider: Keycloak
+      # Authentication__Keycloak__Authority: http://host.docker.internal:8081/realms/home
+      # Authentication__Keycloak__ClientId: reelsoon
+      # Authentication__Keycloak__ClientSecret:
+      # Authentication__Keycloak__PublicOrigin: ""
+      # Authentication__Keycloak__BackchannelBaseUrl: ""
+
+    volumes:
+      - ${REELSOON_DATA:-./data}:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:18-alpine
+    ports:
+      - "5439:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-postgres}"
+      POSTGRES_DB: reelsoon
+    volumes:
+      - reelsoon-pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # keycloak:
+  #   image: quay.io/keycloak/keycloak:26.5.5
+  #   container_name: reelsoon-keycloak
+  #   ports:
+  #     - "8081:8080"
+  #   environment:
+  #     KC_BOOTSTRAP_ADMIN_USERNAME: admin
+  #     KC_BOOTSTRAP_ADMIN_PASSWORD: "${KEYCLOAK_ADMIN_PASSWORD:-admin}"
+  #     KC_DB: postgres
+  #     KC_DB_URL: jdbc:postgresql://db:5432/keycloak
+  #     KC_DB_USERNAME: postgres
+  #     KC_DB_PASSWORD: "${POSTGRES_PASSWORD:-postgres}"
+  #   command: start-dev
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+
+volumes:
+  reelsoon-pgdata:

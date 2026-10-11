@@ -1,0 +1,33 @@
+@page
+@model ReelSoon.Areas.Identity.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Sign in";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p class="rs-hint">Use the administrator account, or one you registered.</p>
+
+<form id="account" method="post">
+    <div asp-validation-summary="ModelOnly" class="rs-validation" role="alert"></div>
+
+    <div class="rs-field">
+        <label asp-for="Input.Email"></label>
+        <input asp-for="Input.Email" class="rs-input" autocomplete="username" autofocus />
+        <span asp-validation-for="Input.Email" class="rs-validation"></span>
+    </div>
+
+    <div class="rs-field">
+        <label asp-for="Input.Password"></label>
+        <input asp-for="Input.Password" class="rs-input" autocomplete="current-password" />
+        <span asp-validation-for="Input.Password" class="rs-validation"></span>
+    </div>
+
+    <label class="rs-check">
+        <input asp-for="Input.RememberMe" />
+        <span>Remember me</span>
+    </label>
+
+    <button id="login-submit" type="submit" class="rs-button rs-button-primary rs-button-block">Sign in</button>
+</form>
+
+<p class="rs-hint">No account yet? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Create one</a></p>

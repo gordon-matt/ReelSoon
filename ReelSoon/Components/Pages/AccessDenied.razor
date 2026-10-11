@@ -1,0 +1,10 @@
+@page "/access-denied"
+@layout EmptyLayout
+@attribute [AllowAnonymous]
+
+<PageTitle>Access denied — ReelSoon</PageTitle>
+
+<EmptyState IconName="alert" Title="You don't have access to this">
+    <p>Ask an administrator if you think you should.</p>
+    <a class="rs-button rs-button-primary" href="/movies">Back to your lists</a>
+</EmptyState>

@@ -1,0 +1,14 @@
+global using System.Security.Claims;
+global using System.Text.Json;
+global using Ardalis.Result;
+global using Extenso.Data.Entity;
+global using Microsoft.EntityFrameworkCore;
+global using ReelSoon;
+global using ReelSoon.Data;
+global using ReelSoon.Data.Entities;
+global using ReelSoon.Infrastructure;
+global using ReelSoon.Models;
+global using ReelSoon.Services;
+global using ReelSoon.Services.Auth;
+global using ReelSoon.Services.Notifications;
+global using ReelSoon.Services.WatchItems;

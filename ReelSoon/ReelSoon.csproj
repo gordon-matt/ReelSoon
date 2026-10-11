@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>reelsoon-web-8c4a1e27-5b90-4d6f-a318-7e2c9b64d051</UserSecretsId>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<Version>1.0.0</Version>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Ardalis.Result" Version="10.1.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.12" />
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.12" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.12" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.12" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.12">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\ReelSoon.Core\ReelSoon.Core.csproj" />
+		<ProjectReference Include="..\ReelSoon.Data\ReelSoon.Data.csproj" />
+		<ProjectReference Include="..\ReelSoon.Data.MySql\ReelSoon.Data.MySql.csproj" />
+		<ProjectReference Include="..\ReelSoon.Data.Npgsql\ReelSoon.Data.Npgsql.csproj" />
+		<ProjectReference Include="..\ReelSoon.Data.Sql\ReelSoon.Data.Sql.csproj" />
+		<ProjectReference Include="..\ReelSoon.Data.Sqlite\ReelSoon.Data.Sqlite.csproj" />
+		<ProjectReference Include="..\ReelSoon.Models\ReelSoon.Models.csproj" />
+		<ProjectReference Include="..\ReelSoon.Services\ReelSoon.Services.csproj" />
+	</ItemGroup>
+
+</Project>

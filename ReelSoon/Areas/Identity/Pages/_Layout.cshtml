@@ -1,0 +1,25 @@
+@{
+    string siteName = Constants.ServerSettingDefaults.SiteName;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - @siteName</title>
+    <link rel="icon" type="image/png" href="~/favicon.png" />
+    <link rel="stylesheet" href="~/css/reelsoon.css" />
+    <script src="~/js/theme-init.js"></script>
+</head>
+<body>
+    <div class="rs-auth-shell">
+        <div class="rs-auth-card">
+            <a class="rs-brand" href="/movies">
+                <img class="rs-logo" src="~/img/Logo.png" alt="@siteName" />
+            </a>
+            @RenderBody()
+        </div>
+    </div>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

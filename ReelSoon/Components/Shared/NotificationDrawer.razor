@@ -1,0 +1,51 @@
+<aside class="rs-notify" aria-label="Notifications">
+    <header class="rs-details-head">
+        <div class="rs-details-title">
+            <Icon Name="bell" />
+            <strong>Notifications</strong>
+        </div>
+        <button type="button" class="rs-icon-button" title="Close" @onclick="OnClose">
+            <Icon Name="x" />
+        </button>
+    </header>
+
+    <div class="rs-details-body">
+        @if (loading)
+        {
+            <p class="rs-muted">Loading…</p>
+        }
+        else if (loadError is not null)
+        {
+            <EmptyState IconName="alert" Title="Notifications could not be read">
+                @loadError
+            </EmptyState>
+        }
+        else if (items.Count == 0)
+        {
+            <EmptyState IconName="bell" Title="You're up to date">
+                <p>When a movie, show or game on your list is released, it shows up here.</p>
+            </EmptyState>
+        }
+        else
+        {
+            <ul class="rs-notify-list">
+                @foreach (var notice in items)
+                {
+                    <li class="rs-notify-item @(notice.IsUnread ? "is-unread" : null)" @key="notice.Id">
+                        <div class="rs-notify-copy">
+                            <strong>@notice.Title</strong>
+                            <p>@notice.Message</p>
+                            <span class="rs-muted rs-small">@When(notice.CreatedAt)</span>
+                        </div>
+                        <div class="rs-notify-actions">
+                            <button type="button" class="rs-button" @onclick="() => ViewAsync(notice)">View</button>
+                            <button type="button" class="rs-icon-button rs-danger-hover" title="Delete" @onclick="() => DeleteAsync(notice)">
+                                <Icon Name="trash" />
+                            </button>
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+</aside>

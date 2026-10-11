@@ -1,0 +1,16 @@
+**/.dockerignore
+**/.env
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
+**/.idea
+**/*.user
+**/bin
+**/obj
+**/node_modules
+**/wwwroot/lib
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/Properties/launchSettings.json

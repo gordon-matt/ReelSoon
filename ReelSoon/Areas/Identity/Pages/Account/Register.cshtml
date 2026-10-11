@@ -1,0 +1,39 @@
+@page
+@model ReelSoon.Areas.Identity.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Create account";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly" class="rs-validation" role="alert"></div>
+
+    <div class="rs-field">
+        <label asp-for="Input.UserName"></label>
+        <input asp-for="Input.UserName" class="rs-input" autocomplete="username" autofocus />
+        <span asp-validation-for="Input.UserName" class="rs-validation"></span>
+    </div>
+
+    <div class="rs-field">
+        <label asp-for="Input.Email"></label>
+        <input asp-for="Input.Email" class="rs-input" autocomplete="email" />
+        <span asp-validation-for="Input.Email" class="rs-validation"></span>
+    </div>
+
+    <div class="rs-field">
+        <label asp-for="Input.Password"></label>
+        <input asp-for="Input.Password" class="rs-input" autocomplete="new-password" />
+        <span asp-validation-for="Input.Password" class="rs-validation"></span>
+    </div>
+
+    <div class="rs-field">
+        <label asp-for="Input.ConfirmPassword"></label>
+        <input asp-for="Input.ConfirmPassword" class="rs-input" autocomplete="new-password" />
+        <span asp-validation-for="Input.ConfirmPassword" class="rs-validation"></span>
+    </div>
+
+    <button type="submit" class="rs-button rs-button-primary rs-button-block">Create account</button>
+</form>
+
+<p class="rs-hint">Already registered? <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Sign in</a></p>
