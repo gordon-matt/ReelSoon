@@ -4,6 +4,12 @@ ReelSoon is a self-hosted list of movies, TV shows, and games you want to know a
 
 It does not track what you have already watched, and it does not collect ratings.
 
+## Screenshots
+
+<img src="https://github.com/gordon-matt/ReelSoon/blob/master/_Misc/Screenshots/Games.png" alt="Games" />
+
+<img src="https://github.com/gordon-matt/ReelSoon/blob/master/_Misc/Screenshots/Movies.png" alt="Movies" />
+
 ## What it does
 
 - Separate lists for movies, TV shows, and games.
