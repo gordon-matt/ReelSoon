@@ -28,7 +28,67 @@
     </header>
 
     <div class="rs-details-body">
-        @if (Editing)
+        @if (Creating)
+        {
+            <div class="rs-field">
+                <label for="catalog-query">Search</label>
+                <input id="catalog-query"
+                       class="rs-input"
+                       value="@query"
+                       @oninput="OnQueryInput"
+                       placeholder="@SearchPlaceholder"
+                       autocomplete="off"
+                       autofocus />
+                <span class="rs-hint">@SearchHint</span>
+            </div>
+
+            @if (Searching)
+            {
+                <p class="rs-muted">Searching…</p>
+            }
+            else if (!string.IsNullOrWhiteSpace(SearchError))
+            {
+                <p class="rs-validation" role="alert">@SearchError</p>
+            }
+            else if (query.Trim().Length >= 2 && Hits.Count == 0 && Searched)
+            {
+                <p class="rs-hint">Nothing matched. You can add it yourself.</p>
+            }
+
+            @if (Hits.Count > 0)
+            {
+                <div class="rs-catalog-results">
+                    @foreach (var hit in Hits)
+                    {
+                        <button type="button" class="rs-catalog-hit" @onclick="() => OnPick.InvokeAsync(hit)" disabled="@Saving" @key="hit.ExternalId">
+                            <span class="rs-row-art">
+                                @if (!string.IsNullOrWhiteSpace(hit.ImageUrl))
+                                {
+                                    <img src="@hit.ImageUrl" alt="" />
+                                }
+                                else
+                                {
+                                    <Icon Name="@Kind.Icon()" />
+                                }
+                            </span>
+                            <span class="rs-catalog-copy">
+                                <strong>@hit.Title</strong>
+                                <span class="rs-muted">
+                                    @(hit.ReleaseDate is DateOnly date ? ReleaseText.Long(date) : "No date yet")
+                                </span>
+                            </span>
+                        </button>
+                    }
+                </div>
+            }
+
+            @if (!Manual)
+            {
+                <button type="button" class="rs-button" @onclick="OnShowManual">Add it yourself</button>
+            }
+        }
+
+        @if (Editing && (!Creating || Manual))
         {
             <EditForm Model="Form" OnValidSubmit="OnSave">
                 <DataAnnotationsValidator />
@@ -36,6 +96,11 @@
                 @if (!string.IsNullOrWhiteSpace(Error))
                 {
                     <p class="rs-validation" role="alert">@Error</p>
+                }
+
+                @if (CatalogLinked)
+                {
+                    <p class="rs-hint">The title, date, image, and description are refreshed from the catalog once a day. Notes stay yours.</p>
                 }
 
                 <div class="rs-field">
@@ -96,7 +161,20 @@
                         <span class="rs-muted">No date yet</span>
                     }
                 </dd>
+                @if (Item.CatalogSource is CatalogSource source)
+                {
+                    <dt>Source</dt>
+                    <dd>@(source == CatalogSource.Igdb ? "IGDB" : "TMDB")</dd>
+                }
             </dl>
+
+            @if (!string.IsNullOrWhiteSpace(Item.Overview))
+            {
+                <section>
+                    <h4>About</h4>
+                    <p class="rs-notes">@Item.Overview</p>
+                </section>
+            }
 
             @if (!string.IsNullOrWhiteSpace(Item.Notes))
             {

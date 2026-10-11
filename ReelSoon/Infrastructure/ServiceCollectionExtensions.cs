@@ -1,3 +1,4 @@
+using Hangfire;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -39,6 +40,65 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddReelSoonRepositories(this IServiceCollection services)
     {
         services.AddEntityFrameworkRepository();
+        return services;
+    }
+
+    /// <summary>
+    /// Stores Hangfire jobs in the same database family as the app. SQLite gets its own file.
+    /// </summary>
+    public static IServiceCollection AddReelSoonHangfire(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        string provider = ReelSoonConfiguration.ResolveDatabaseProvider(configuration);
+        string? hangfireExplicit = configuration.GetConnectionString("Hangfire");
+        string? connectionString = string.IsNullOrWhiteSpace(hangfireExplicit)
+            ? configuration.GetConnectionString("DefaultConnection")
+            : hangfireExplicit;
+
+        switch (provider)
+        {
+            case Constants.DatabaseProviders.Sqlite:
+                services.AddReelSoonSqliteHangfire(configuration["Hangfire:SqlitePath"]);
+                break;
+
+            case Constants.DatabaseProviders.SqlServer:
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    throw new InvalidOperationException("Hangfire requires a connection string when using SqlServer.");
+                }
+
+                services.AddReelSoonSqlServerHangfire(connectionString);
+                break;
+
+            case Constants.DatabaseProviders.Npgsql:
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    throw new InvalidOperationException("Hangfire requires a connection string when using Npgsql.");
+                }
+
+                services.AddReelSoonNpgsqlHangfire(connectionString);
+                break;
+
+            case Constants.DatabaseProviders.MySql:
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    throw new InvalidOperationException("Hangfire requires a connection string when using MySql.");
+                }
+
+                services.AddReelSoonMySqlHangfire(connectionString);
+                break;
+
+            default:
+                throw new InvalidOperationException($"Unknown Database:Provider '{provider}'.");
+        }
+
+        services.AddHangfireServer(options =>
+        {
+            options.ServerName = "main";
+            options.WorkerCount = 2;
+        });
+
         return services;
     }
 

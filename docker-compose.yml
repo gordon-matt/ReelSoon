@@ -12,7 +12,12 @@
 # Other database providers (set Database__Provider and ConnectionStrings__DefaultConnection):
 #   Sqlite     Data Source=/app/data/reelsoon.db
 #   SqlServer  Server=host;Database=reelsoon;User Id=sa;Password=...;TrustServerCertificate=True
-#   MySql      Server=host;Database=reelsoon;User=root;Password=...
+#   MySql      Server=host;Database=reelsoon;User=root;Password=...;Allow User Variables=True
+#
+# Online search (movies and TV use TMDB, games use IGDB via a Twitch app):
+#   Catalog__Tmdb__ApiKey
+#   Catalog__Igdb__ClientId
+#   Catalog__Igdb__ClientSecret
 
 services:
   app:

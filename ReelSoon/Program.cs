@@ -1,5 +1,8 @@
+using Hangfire;
+using Hangfire.Dashboard;
 using ReelSoon.Components;
 using ReelSoon.Infrastructure;
+using ReelSoon.Services.Catalog;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.HttpOverrides;
 using Serilog;
@@ -32,14 +35,14 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<AppEvents>();
 builder.Services.AddScoped<ToastService>();
 builder.Services.AddSingleton(TimeProvider.System);
-
-builder.Services.Configure<ReleaseCheckOptions>(builder.Configuration.GetSection(ReleaseCheckOptions.SectionName));
-builder.Services.AddHostedService<ReleaseCheckWorker>();
+builder.Services.AddMemoryCache();
+builder.Services.Configure<CatalogOptions>(builder.Configuration.GetSection(CatalogOptions.SectionName));
 
 string databaseProvider = ReelSoonConfiguration.ResolveDatabaseProvider(builder.Configuration);
 
 builder.Services.AddReelSoonDatabase(builder.Configuration);
 builder.Services.AddReelSoonRepositories();
+builder.Services.AddReelSoonHangfire(builder.Configuration);
 
 var authProvider = builder.Services.AddReelSoonAuthentication(builder.Configuration);
 
@@ -79,6 +82,11 @@ app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = [new HangfireAuthorizationFilter()],
+});
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .WithStaticAssets();
@@ -106,6 +114,8 @@ await using (var scope = app.Services.CreateAsyncScope())
         throw;
     }
 }
+
+HangfireRecurringJobs.Register();
 
 Log.Information(
     "ReelSoon {Version} started with the {DatabaseProvider} database provider and {AuthProvider} authentication",

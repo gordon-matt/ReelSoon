@@ -23,12 +23,28 @@ public sealed record WatchItemDto(
     MediaKind Kind,
     string Title,
     string? Notes,
+    string? Overview,
     DateOnly? ReleaseDate,
     string? LinkUrl,
     string? ImageUrl,
+    CatalogSource? CatalogSource,
+    string? ExternalId,
     DateTime CreatedAt,
     DateTime UpdatedAt,
     bool IsReleased);
+
+/// <summary>A movie, series, or game returned by an online catalog search.</summary>
+public sealed record CatalogHit(
+    CatalogSource Source,
+    string ExternalId,
+    string Title,
+    string? Overview,
+    DateOnly? ReleaseDate,
+    string? ImageUrl,
+    string? LinkUrl);
+
+/// <summary>Result of adding a catalog hit. <see cref="AlreadyListed"/> means it was already on the list.</summary>
+public sealed record CatalogAdd(WatchItemDto Item, bool AlreadyListed);
 
 public sealed record WatchListCounts(int Movies, int TvShows, int Games)
 {

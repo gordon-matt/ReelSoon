@@ -1,3 +1,4 @@
+using ReelSoon.Services.Catalog;
 using ReelSoon.Services.Notifications;
 
 namespace ReelSoon.Services.WatchItems;
@@ -8,6 +9,7 @@ public sealed class WatchItemService(
     IRepository<WatchItem> items,
     IRepository<WatchNotification> notifications,
     IReleaseNotificationService releases,
+    ICatalogService catalog,
     TimeProvider time) : IWatchItemService
 {
     public async Task<Result<IReadOnlyList<WatchItemDto>>> ListAsync(
@@ -102,6 +104,68 @@ public sealed class WatchItemService(
         return saved.IsSuccessStatus()
             ? Result<WatchItemDto>.Success(ToDto(saved.Value, Today()))
             : Result<WatchItemDto>.Success(ToDto(created, Today()));
+    }
+
+    public async Task<Result<CatalogAdd>> AddFromCatalogAsync(
+        MediaKind kind,
+        CatalogHit hit,
+        CancellationToken cancellationToken = default)
+    {
+        if (ResolveOwner() is not string ownerUserId)
+        {
+            return Result<CatalogAdd>.Unauthorized();
+        }
+
+        if (string.IsNullOrWhiteSpace(hit.ExternalId) || string.IsNullOrWhiteSpace(hit.Title))
+        {
+            return Result<CatalogAdd>.Invalid(new ValidationError(nameof(hit.Title), "That search result cannot be added."));
+        }
+
+        var existing = await items.FindOneAsync(new SearchOptions<WatchItem>
+        {
+            Query = item => item.OwnerUserId == ownerUserId
+                && item.Kind == kind
+                && item.CatalogSource == hit.Source
+                && item.ExternalId == hit.ExternalId,
+            CancellationToken = cancellationToken,
+        });
+
+        if (existing is not null)
+        {
+            return Result<CatalogAdd>.Success(new CatalogAdd(ToDto(existing, Today()), AlreadyListed: true));
+        }
+
+        var fresh = await catalog.GetAsync(kind, hit.Source, hit.ExternalId, cancellationToken);
+        var chosen = fresh.IsSuccess ? fresh.Value : hit;
+
+        var now = time.GetUtcNow().UtcDateTime;
+        var created = await items.InsertAsync(new WatchItem
+        {
+            Kind = kind,
+            Title = CatalogText.Title(chosen.Title),
+            Overview = chosen.Overview,
+            ReleaseDate = chosen.ReleaseDate,
+            LinkUrl = chosen.LinkUrl,
+            ImageUrl = chosen.ImageUrl,
+            CatalogSource = chosen.Source,
+            ExternalId = chosen.ExternalId,
+            OwnerUserId = ownerUserId,
+            CreatedAt = now,
+            UpdatedAt = now,
+        });
+
+        logger.LogInformation(
+            "Added {Kind} '{Title}' from {Source} {ExternalId}",
+            kind,
+            created.Title,
+            chosen.Source,
+            chosen.ExternalId);
+
+        await releases.NotifyDueAsync(cancellationToken);
+
+        var saved = await FindOwnedAsync(created.Id, cancellationToken);
+        var dto = saved.IsSuccessStatus() ? ToDto(saved.Value, Today()) : ToDto(created, Today());
+        return Result<CatalogAdd>.Success(new CatalogAdd(dto, AlreadyListed: false));
     }
 
     public async Task<Result<WatchItemDto>> UpdateAsync(
@@ -236,9 +300,12 @@ public sealed class WatchItemService(
         item.Kind,
         item.Title,
         item.Notes,
+        item.Overview,
         item.ReleaseDate,
         item.LinkUrl,
         item.ImageUrl,
+        item.CatalogSource,
+        item.ExternalId,
         item.CreatedAt,
         item.UpdatedAt,
         ReleaseText.IsReleased(item.ReleaseDate, today));

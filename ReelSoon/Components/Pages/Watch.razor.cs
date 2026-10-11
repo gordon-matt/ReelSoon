@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using ReelSoon.Components.Shared;
+using ReelSoon.Services.Catalog;
 
 namespace ReelSoon.Components.Pages;
 
@@ -14,6 +15,9 @@ public partial class Watch : IDisposable
 
     [Inject]
     private IWatchItemService WatchItems { get; set; } = default!;
+
+    [Inject]
+    private ICatalogService Catalog { get; set; } = default!;
 
     [Inject]
     private NavigationManager Navigation { get; set; } = default!;
@@ -48,6 +52,13 @@ public partial class Watch : IDisposable
     private string? formError;
     private WatchItemForm form = new();
     private ConfirmDialog confirm = default!;
+
+    private List<CatalogHit> hits = [];
+    private bool searching;
+    private bool searched;
+    private bool manual;
+    private string? searchError;
+    private int searchGeneration;
 
     private bool drawerOpen => creating || selected is not null;
 
@@ -117,6 +128,10 @@ public partial class Watch : IDisposable
         if (next != kind)
         {
             filter = ListFilter.All;
+            creating = false;
+            editing = false;
+            selected = null;
+            ResetCatalogSearch();
         }
 
         kind = next;
@@ -195,6 +210,7 @@ public partial class Watch : IDisposable
         selected = null;
         form = new WatchItemForm();
         formError = null;
+        ResetCatalogSearch();
 
         if (SelectedId is not null)
         {
@@ -244,6 +260,87 @@ public partial class Watch : IDisposable
 
         editing = false;
         formError = null;
+    }
+
+    private void ShowManual() => manual = true;
+
+    private void ResetCatalogSearch()
+    {
+        searchGeneration++;
+        hits = [];
+        searching = false;
+        searched = false;
+        manual = false;
+        searchError = null;
+    }
+
+    private async Task SearchCatalogAsync(string query)
+    {
+        int generation = ++searchGeneration;
+        string term = query.Trim();
+
+        if (term.Length < 2)
+        {
+            hits = [];
+            searching = false;
+            searched = false;
+            searchError = null;
+            return;
+        }
+
+        searching = true;
+        searched = false;
+        searchError = null;
+
+        var result = await Catalog.SearchAsync(kind, term);
+        if (generation != searchGeneration)
+        {
+            return;
+        }
+
+        searching = false;
+        searched = true;
+
+        if (!result.IsSuccess)
+        {
+            hits = [];
+            searchError = result.GetDisplayMessage();
+            return;
+        }
+
+        hits = [.. result.Value];
+    }
+
+    private async Task PickAsync(CatalogHit hit)
+    {
+        saving = true;
+        formError = null;
+
+        var added = await WatchItems.AddFromCatalogAsync(kind, hit);
+        saving = false;
+
+        if (!added.IsSuccess)
+        {
+            searchError = added.GetDisplayMessage();
+            return;
+        }
+
+        if (added.Value.AlreadyListed)
+        {
+            Toasts.Show($"{added.Value.Item.Title} is already on your list.");
+        }
+        else
+        {
+            Toasts.Success($"Added {added.Value.Item.Title}.");
+        }
+
+        Events.RaiseListsChanged();
+        Events.RaiseNotificationsChanged();
+        creating = false;
+        editing = false;
+        ResetCatalogSearch();
+        await LoadAsync(loadedSearch);
+        Navigation.NavigateTo(ItemUrl(added.Value.Item.Id));
     }
 
     private async Task SaveAsync()

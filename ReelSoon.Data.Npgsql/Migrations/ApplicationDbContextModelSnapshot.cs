@@ -243,8 +243,16 @@ namespace ReelSoon.Data.Npgsql.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("CatalogSource")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(64)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(2000)
@@ -260,6 +268,11 @@ namespace ReelSoon.Data.Npgsql.Migrations
                         .HasColumnType("character varying(2000)");
 
                     b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .IsUnicode(true)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("Overview")
                         .HasMaxLength(4000)
                         .IsUnicode(true)
                         .HasColumnType("character varying(4000)");
@@ -290,6 +303,8 @@ namespace ReelSoon.Data.Npgsql.Migrations
                     b.HasIndex("ReleaseDate", "ReleaseNotifiedAt");
 
                     b.HasIndex("OwnerUserId", "Kind", "Title");
+
+                    b.HasIndex("OwnerUserId", "Kind", "CatalogSource", "ExternalId");
 
                     b.ToTable("WatchItems", "app");
                 });

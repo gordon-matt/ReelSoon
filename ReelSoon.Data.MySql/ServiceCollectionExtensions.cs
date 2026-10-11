@@ -1,4 +1,7 @@
+using System.Transactions;
 using Extenso.Data.Entity;
+using Hangfire;
+using Hangfire.Storage.MySql;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,6 +30,32 @@ public static class ServiceCollectionExtensions
 
             services.AddScoped<ApplicationDbContextBase>(sp => sp.GetRequiredService<ApplicationDbContext>());
             services.AddSingleton<IDbContextFactory, ApplicationDbContextFactory>();
+
+            return services;
+        }
+
+        /// <summary>
+        /// The connection string should include <c>Allow User Variables=True</c>.
+        /// </summary>
+        public IServiceCollection AddReelSoonMySqlHangfire(string connectionString)
+        {
+            var storage = new MySqlStorage(connectionString, new MySqlStorageOptions
+            {
+                TransactionIsolationLevel = IsolationLevel.ReadCommitted,
+                QueuePollInterval = TimeSpan.FromSeconds(15),
+                JobExpirationCheckInterval = TimeSpan.FromHours(1),
+                CountersAggregateInterval = TimeSpan.FromMinutes(5),
+                PrepareSchemaIfNecessary = true,
+                DashboardJobListLimit = 50000,
+                TransactionTimeout = TimeSpan.FromMinutes(1),
+                TablesPrefix = "Hangfire",
+            });
+
+            services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseStorage(storage));
 
             return services;
         }

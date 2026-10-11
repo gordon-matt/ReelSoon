@@ -1,4 +1,6 @@
 using Extenso.Data.Entity;
+using Hangfire;
+using Hangfire.Storage.SQLite;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +33,22 @@ public static class ServiceCollectionExtensions
             // provider-agnostic and the concrete context is an implementation detail.
             services.AddScoped<ApplicationDbContextBase>(sp => sp.GetRequiredService<ApplicationDbContext>());
             services.AddSingleton<IDbContextFactory, ApplicationDbContextFactory>();
+
+            return services;
+        }
+
+        /// <summary>
+        /// Hangfire uses its own SQLite file so job-state writes don't contend with the watch list.
+        /// </summary>
+        public IServiceCollection AddReelSoonSqliteHangfire(string? hangfireDbPath = null)
+        {
+            string path = string.IsNullOrWhiteSpace(hangfireDbPath) ? "hangfire.db" : hangfireDbPath;
+
+            services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSQLiteStorage(path));
 
             return services;
         }

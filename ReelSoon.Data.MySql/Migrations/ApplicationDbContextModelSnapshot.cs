@@ -234,8 +234,16 @@ namespace ReelSoon.Data.MySql.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int?>("CatalogSource")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(64)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(64)");
 
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(2000)
@@ -251,6 +259,11 @@ namespace ReelSoon.Data.MySql.Migrations
                         .HasColumnType("varchar(2000)");
 
                     b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .IsUnicode(true)
+                        .HasColumnType("varchar(4000)");
+
+                    b.Property<string>("Overview")
                         .HasMaxLength(4000)
                         .IsUnicode(true)
                         .HasColumnType("varchar(4000)");
@@ -281,6 +294,8 @@ namespace ReelSoon.Data.MySql.Migrations
                     b.HasIndex("ReleaseDate", "ReleaseNotifiedAt");
 
                     b.HasIndex("OwnerUserId", "Kind", "Title");
+
+                    b.HasIndex("OwnerUserId", "Kind", "CatalogSource", "ExternalId");
 
                     b.ToTable("WatchItems", "app");
                 });

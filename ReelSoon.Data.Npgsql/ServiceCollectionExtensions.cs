@@ -1,4 +1,6 @@
 using Extenso.Data.Entity;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,6 +29,21 @@ public static class ServiceCollectionExtensions
 
             services.AddScoped<ApplicationDbContextBase>(sp => sp.GetRequiredService<ApplicationDbContext>());
             services.AddSingleton<IDbContextFactory, ApplicationDbContextFactory>();
+
+            return services;
+        }
+
+        public IServiceCollection AddReelSoonNpgsqlHangfire(string connectionString)
+        {
+            services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UsePostgreSqlStorage(options => options.UseNpgsqlConnection(connectionString),
+                    new PostgreSqlStorageOptions
+                    {
+                        QueuePollInterval = TimeSpan.FromSeconds(15),
+                    }));
 
             return services;
         }

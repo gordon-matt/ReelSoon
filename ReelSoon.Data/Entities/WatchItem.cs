@@ -17,6 +17,15 @@ public class WatchItem : BaseEntity<int>
 
     public string? ImageUrl { get; set; }
 
+    /// <summary>Plot or description copied from the catalog. Separate from the user's own notes.</summary>
+    public string? Overview { get; set; }
+
+    /// <summary>Set when the title was added from an online search. Manual titles leave this empty.</summary>
+    public CatalogSource? CatalogSource { get; set; }
+
+    /// <summary>TMDB or IGDB id, used to refresh the poster, description, and release date.</summary>
+    public string? ExternalId { get; set; }
+
     /// <summary>Identity user id, Keycloak <c>sub</c>, or the synthetic id in <c>None</c> mode.</summary>
     public required string OwnerUserId { get; set; }
 
@@ -44,9 +53,12 @@ public class WatchItemMap : IEntityTypeConfiguration<WatchItem>
         builder.Property(m => m.Notes).HasMaxLength(Constants.MaxLengths.Notes).IsUnicode(true);
         builder.Property(m => m.LinkUrl).HasMaxLength(Constants.MaxLengths.Url).IsUnicode(false);
         builder.Property(m => m.ImageUrl).HasMaxLength(Constants.MaxLengths.Url).IsUnicode(false);
+        builder.Property(m => m.Overview).HasMaxLength(Constants.MaxLengths.Notes).IsUnicode(true);
+        builder.Property(m => m.ExternalId).HasMaxLength(Constants.MaxLengths.ExternalId).IsUnicode(false);
         builder.Property(m => m.OwnerUserId).IsRequired().HasMaxLength(Constants.MaxLengths.UserId).IsUnicode(false);
 
         builder.HasIndex(m => new { m.OwnerUserId, m.Kind, m.Title });
+        builder.HasIndex(m => new { m.OwnerUserId, m.Kind, m.CatalogSource, m.ExternalId });
         builder.HasIndex(m => new { m.ReleaseDate, m.ReleaseNotifiedAt });
     }
 }

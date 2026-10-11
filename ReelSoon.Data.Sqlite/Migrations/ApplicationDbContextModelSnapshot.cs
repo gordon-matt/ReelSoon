@@ -233,7 +233,15 @@ namespace ReelSoon.Data.Sqlite.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("CatalogSource")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(64)
+                        .IsUnicode(false)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ImageUrl")
@@ -250,6 +258,11 @@ namespace ReelSoon.Data.Sqlite.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .IsUnicode(true)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Overview")
                         .HasMaxLength(4000)
                         .IsUnicode(true)
                         .HasColumnType("TEXT");
@@ -280,6 +293,8 @@ namespace ReelSoon.Data.Sqlite.Migrations
                     b.HasIndex("ReleaseDate", "ReleaseNotifiedAt");
 
                     b.HasIndex("OwnerUserId", "Kind", "Title");
+
+                    b.HasIndex("OwnerUserId", "Kind", "CatalogSource", "ExternalId");
 
                     b.ToTable("WatchItems", "app");
                 });

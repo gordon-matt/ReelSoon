@@ -31,6 +31,7 @@ public static class Constants
         public const int Title = 300;
         public const int Notes = 4000;
         public const int Url = 2000;
+        public const int ExternalId = 64;
         public const int Message = 500;
         public const int UserId = 450;
     }

@@ -12,6 +12,8 @@
 		<PackageReference Include="LinqKit.Core" Version="1.2.11" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.12" />
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.9" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
 		<PackageReference Include="Microsoft.Extensions.Options" Version="10.0.12" />
 	</ItemGroup>
