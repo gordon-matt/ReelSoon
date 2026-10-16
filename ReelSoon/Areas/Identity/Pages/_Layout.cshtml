@@ -1,23 +1,42 @@
+@using Microsoft.Extensions.Options
+@using Heroicsoft.NetForge.Components
+@inject IOptions<ForgeUiOptions> UiOptions
+@*
+    Layout for the embedded ASP.NET Identity UI. These are plain Razor Pages rendered before any
+    Blazor circuit exists, so they load the same stylesheet, theme script and accent as
+    ForgeHostPage and carry the visitor's stored theme across from the app.
+*@
 @{
     string siteName = Constants.ServerSettingDefaults.SiteName;
+    var ui = UiOptions.Value;
+    string? accentCss = ForgeAccentCss.Build(ui);
+    string defaultScheme = ui.DefaultColorScheme.Trim().ToLowerInvariant();
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="@(defaultScheme == "dark" ? "dark" : "light")">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - @siteName</title>
     <link rel="icon" type="image/png" href="~/favicon.png" />
-    <link rel="stylesheet" href="~/css/reelsoon.css" />
-    <script src="~/js/theme-init.js"></script>
+    <script src="~/_content/Heroicsoft.NetForge.Components/js/theme-init.js"
+            data-theme-key="@ui.ThemeStorageKey"
+            data-default-theme="@defaultScheme"></script>
+    <link rel="stylesheet" href="~/_content/Heroicsoft.NetForge.Components/css/nf.css" />
+    @if (accentCss is not null)
+    {
+        <style>@Html.Raw(accentCss)</style>
+    }
 </head>
 <body>
-    <div class="rs-auth-shell">
-        <div class="rs-auth-card">
-            <a class="rs-brand" href="/movies">
-                <img class="rs-logo" src="~/img/Logo.png" alt="@siteName" />
-            </a>
-            @RenderBody()
+    <div class="nf-standalone">
+        <div class="nf-standalone-body">
+            <div class="nf-auth-card">
+                <a class="nf-brand-link" href="/movies">
+                    <img class="nf-brand-logo" src="~/img/Logo.png" alt="@siteName" />
+                </a>
+                @RenderBody()
+            </div>
         </div>
     </div>
     @await RenderSectionAsync("Scripts", required: false)

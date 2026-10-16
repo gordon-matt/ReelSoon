@@ -1,16 +1,12 @@
 namespace ReelSoon.Infrastructure;
 
 /// <summary>
-/// Circuit-scoped signals so a save on the list page can refresh the sidebar counts and the
-/// notification badge without those components polling each other.
+/// Circuit-scoped signal so a save on the list page can refresh the notification badge and the
+/// open list without those components polling each other. Sidebar counts go through SidebarRefresh.
 /// </summary>
 public sealed class AppEvents
 {
-    public event Action? ListsChanged;
-
     public event Action? NotificationsChanged;
-
-    public void RaiseListsChanged() => ListsChanged?.Invoke();
 
     public void RaiseNotificationsChanged() => NotificationsChanged?.Invoke();
 }

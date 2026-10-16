@@ -1,21 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/" />
-    <title>ReelSoon</title>
-    <link rel="icon" type="image/png" href="favicon.png" />
-    <link rel="stylesheet" href="@Assets["css/reelsoon.css"]" />
-    <script src="@Assets["js/theme-init.js"]"></script>
-    <HeadOutlet @rendermode="InteractiveServer" />
-</head>
-
-<body>
+<ForgeHostPage Title="ReelSoon" IconHref="favicon.png" AppStylesheet="@Assets["css/reelsoon.css"]">
     <Routes @rendermode="InteractiveServer" />
-    <script src="@Assets["js/reelsoon.js"]"></script>
-    <script src="@Assets["_framework/blazor.web.js"]"></script>
-</body>
-
-</html>
+</ForgeHostPage>

@@ -1,96 +1,83 @@
-@page "/"
 @page "/movies"
 @page "/tv"
 @page "/games"
 @attribute [Authorize]
 
-<PageTitle>@kind.Label() — ReelSoon</PageTitle>
+<PageTitle>@kind.Label() - ReelSoon</PageTitle>
 
-<div class="rs-watch @(drawerOpen ? "rs-details-open" : null)">
-    <div class="rs-watch-main">
-        <div class="rs-page-header">
-            <div class="rs-page-header-bar">
-                <h1>@kind.Label()</h1>
-                <div class="rs-header-actions">
-                    <button type="button" class="rs-button rs-button-primary" @onclick="StartCreate">
-                        <Icon Name="plus" /> Add @kind.Singular().ToLowerInvariant()
-                    </button>
-                </div>
-            </div>
-            @if (!loading && loadError is null)
+<div class="reel-watch @(drawerOpen ? "is-drawer-open" : null)">
+    <PageHeader Title="@kind.Label()" Description="@(!loading && loadError is null ? Summary : null)">
+        <Actions>
+            <button type="button" class="nf-button nf-button-primary" @onclick="StartCreate">
+                <Icon Name="plus" /> Add @kind.Singular().ToLowerInvariant()
+            </button>
+        </Actions>
+    </PageHeader>
+
+    @if (!loading && loadError is null && items.Count > 0)
+    {
+        <div class="nf-chip-row reel-filters" role="tablist">
+            <button type="button" class="nf-chip @(filter == ListFilter.All ? "is-active" : null)" @onclick="() => filter = ListFilter.All">All</button>
+            <button type="button" class="nf-chip @(filter == ListFilter.Upcoming ? "is-active" : null)" @onclick="() => filter = ListFilter.Upcoming">Coming up</button>
+            <button type="button" class="nf-chip @(filter == ListFilter.Released ? "is-active" : null)" @onclick="() => filter = ListFilter.Released">Released</button>
+        </div>
+    }
+
+    @if (loading)
+    {
+        <p class="nf-muted">Loading.</p>
+    }
+    else if (loadError is not null)
+    {
+        <EmptyState Icon="alert" Title="This list could not be read" Description="@loadError" />
+    }
+    else if (items.Count == 0)
+    {
+        <EmptyState Icon="@kind.Icon()" Title="@EmptyTitle" Description="@EmptyBody">
+            @if (string.IsNullOrWhiteSpace(Query))
             {
-                <p>@Summary</p>
+                <button type="button" class="nf-button nf-button-primary" @onclick="StartCreate">
+                    <Icon Name="plus" /> Add @kind.Singular().ToLowerInvariant()
+                </button>
+            }
+            else
+            {
+                <a class="nf-button" href="@kind.Route()">Clear search</a>
+            }
+        </EmptyState>
+    }
+    else if (visible.Count == 0)
+    {
+        <EmptyState Icon="search" Title="Nothing in this filter">
+            <button type="button" class="nf-button" @onclick="() => filter = ListFilter.All">Show all</button>
+        </EmptyState>
+    }
+    else
+    {
+        <div class="reel-grid" role="list">
+            @foreach (var item in visible)
+            {
+                <button type="button"
+                        class="reel-card @(selected?.Id == item.Id && !creating ? "is-selected" : null)"
+                        @onclick="() => Open(item)"
+                        @key="item.Id">
+                    <span class="reel-card-cover">
+                        @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl" alt="" />
+                        }
+                        else
+                        {
+                            <Icon Name="@item.Kind.Icon()" Size="28" />
+                        }
+                        <span class="nf-badge @StatusClass(item)">@ReleaseText.Status(item.ReleaseDate, Today)</span>
+                    </span>
+                    <span class="reel-card-title">@item.Title</span>
+                    <span class="nf-muted nf-small">@ReleaseText.Relative(item.ReleaseDate, Today)</span>
+                </button>
             }
         </div>
-
-        @if (!loading && loadError is null && items.Count > 0)
-        {
-            <div class="rs-filters" role="tablist">
-                <button type="button" class="rs-chip @(filter == ListFilter.All ? "is-active" : null)" @onclick="() => filter = ListFilter.All">All</button>
-                <button type="button" class="rs-chip @(filter == ListFilter.Upcoming ? "is-active" : null)" @onclick="() => filter = ListFilter.Upcoming">Coming up</button>
-                <button type="button" class="rs-chip @(filter == ListFilter.Released ? "is-active" : null)" @onclick="() => filter = ListFilter.Released">Released</button>
-            </div>
-        }
-
-        @if (loading)
-        {
-            <p class="rs-muted">Loading…</p>
-        }
-        else if (loadError is not null)
-        {
-            <EmptyState IconName="alert" Title="This list could not be read">
-                @loadError
-            </EmptyState>
-        }
-        else if (items.Count == 0)
-        {
-            <EmptyState IconName="@kind.Icon()" Title="@EmptyTitle">
-                <p>@EmptyBody</p>
-                @if (string.IsNullOrWhiteSpace(Query))
-                {
-                    <button type="button" class="rs-button rs-button-primary" @onclick="StartCreate">
-                        <Icon Name="plus" /> Add @kind.Singular().ToLowerInvariant()
-                    </button>
-                }
-                else
-                {
-                    <a class="rs-button" href="@kind.Route()">Clear search</a>
-                }
-            </EmptyState>
-        }
-        else if (visible.Count == 0)
-        {
-            <EmptyState IconName="search" Title="Nothing in this filter">
-                <button type="button" class="rs-button" @onclick="() => filter = ListFilter.All">Show all</button>
-            </EmptyState>
-        }
-        else
-        {
-            <div class="rs-grid" role="list">
-                @foreach (var item in visible)
-                {
-                    <button type="button"
-                            class="rs-card @(selected?.Id == item.Id && !creating ? "is-selected" : null)"
-                            @onclick="() => Open(item)"
-                            @key="item.Id">
-                        <span class="rs-card-cover">
-                            @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
-                            {
-                                <img src="@item.ImageUrl" alt="" />
-                            }
-                            else
-                            {
-                                <Icon Name="@item.Kind.Icon()" />
-                            }
-                            <span class="rs-badge @StatusClass(item)">@ReleaseText.Status(item.ReleaseDate, Today)</span>
-                        </span>
-                        <span class="rs-card-title">@item.Title</span>
-                        <span class="rs-card-meta">@ReleaseText.Relative(item.ReleaseDate, Today)</span>
-                    </button>
-                }
-            </div>
-        }
-    </div>
+    }
 
     @if (drawerOpen)
     {
@@ -122,5 +109,3 @@
                     OnDelete="DeleteAsync" />
     }
 </div>
-
-<ConfirmDialog @ref="confirm" />

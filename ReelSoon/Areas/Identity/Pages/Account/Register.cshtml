@@ -7,33 +7,33 @@
 <h1>@ViewData["Title"]</h1>
 
 <form method="post">
-    <div asp-validation-summary="ModelOnly" class="rs-validation" role="alert"></div>
+    <div asp-validation-summary="ModelOnly" class="nf-validation" role="alert"></div>
 
-    <div class="rs-field">
+    <div class="nf-field">
         <label asp-for="Input.UserName"></label>
-        <input asp-for="Input.UserName" class="rs-input" autocomplete="username" autofocus />
-        <span asp-validation-for="Input.UserName" class="rs-validation"></span>
+        <input asp-for="Input.UserName" class="nf-input" autocomplete="username" autofocus />
+        <span asp-validation-for="Input.UserName" class="nf-validation"></span>
     </div>
 
-    <div class="rs-field">
+    <div class="nf-field">
         <label asp-for="Input.Email"></label>
-        <input asp-for="Input.Email" class="rs-input" autocomplete="email" />
-        <span asp-validation-for="Input.Email" class="rs-validation"></span>
+        <input asp-for="Input.Email" class="nf-input" autocomplete="email" />
+        <span asp-validation-for="Input.Email" class="nf-validation"></span>
     </div>
 
-    <div class="rs-field">
+    <div class="nf-field">
         <label asp-for="Input.Password"></label>
-        <input asp-for="Input.Password" class="rs-input" autocomplete="new-password" />
-        <span asp-validation-for="Input.Password" class="rs-validation"></span>
+        <input asp-for="Input.Password" class="nf-input" autocomplete="new-password" />
+        <span asp-validation-for="Input.Password" class="nf-validation"></span>
     </div>
 
-    <div class="rs-field">
+    <div class="nf-field">
         <label asp-for="Input.ConfirmPassword"></label>
-        <input asp-for="Input.ConfirmPassword" class="rs-input" autocomplete="new-password" />
-        <span asp-validation-for="Input.ConfirmPassword" class="rs-validation"></span>
+        <input asp-for="Input.ConfirmPassword" class="nf-input" autocomplete="new-password" />
+        <span asp-validation-for="Input.ConfirmPassword" class="nf-validation"></span>
     </div>
 
-    <button type="submit" class="rs-button rs-button-primary rs-button-block">Create account</button>
+    <button type="submit" class="nf-button nf-button-primary nf-button-block">Create account</button>
 </form>
 
-<p class="rs-hint">Already registered? <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Sign in</a></p>
+<p class="nf-hint">Already registered? <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Sign in</a></p>

@@ -1,0 +1,16 @@
+@page "/"
+@inject NavigationManager Navigation
+
+@code {
+    // The lists live at /movies, /tv and /games. Landing on the bare address goes to the first one,
+    // so the sidebar highlights it and the address bar says where you are.
+    // NavigateTo during prerender throws NavigationException, which the circuit logs. The HTTP
+    // redirect in Program.cs handles a fresh load; this only runs for an in-app navigation.
+    protected override void OnInitialized()
+    {
+        if (RendererInfo.IsInteractive)
+        {
+            Navigation.NavigateTo(MediaKind.Movie.Route(), replace: true);
+        }
+    }
+}

@@ -29,12 +29,9 @@ internal static class CatalogText
         }
 
         string trimmed = value.Trim();
-        if (trimmed.Length > Constants.MaxLengths.Url)
-        {
-            return null;
-        }
-
-        return Uri.TryCreate(trimmed, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https"
+        return trimmed.Length > Constants.MaxLengths.Url
+            ? null
+            : Uri.TryCreate(trimmed, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https"
             ? trimmed
             : null;
     }

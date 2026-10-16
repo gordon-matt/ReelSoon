@@ -254,39 +254,19 @@ public sealed class WatchItemService(
             return Result.Invalid(new ValidationError(nameof(form.Title), "Give it a title."));
         }
 
-        if (form.Title.Trim().Length > Constants.MaxLengths.Title)
-        {
-            return Result.Invalid(new ValidationError(nameof(form.Title), "That title is too long."));
-        }
-
-        if (form.Notes is { Length: > Constants.MaxLengths.Notes })
-        {
-            return Result.Invalid(new ValidationError(nameof(form.Notes), "Those notes are too long."));
-        }
-
-        if (!IsAcceptableUrl(form.LinkUrl))
-        {
-            return Result.Invalid(new ValidationError(nameof(form.LinkUrl), "The link has to be an http or https URL."));
-        }
-
-        if (!IsAcceptableUrl(form.ImageUrl))
-        {
-            return Result.Invalid(new ValidationError(nameof(form.ImageUrl), "The image has to be an http or https URL."));
-        }
-
-        return Result.Success();
+        return form.Title.Trim().Length > Constants.MaxLengths.Title
+            ? Result.Invalid(new ValidationError(nameof(form.Title), "That title is too long."))
+            : form.Notes is { Length: > Constants.MaxLengths.Notes }
+            ? Result.Invalid(new ValidationError(nameof(form.Notes), "Those notes are too long."))
+            : !IsAcceptableUrl(form.LinkUrl)
+            ? Result.Invalid(new ValidationError(nameof(form.LinkUrl), "The link has to be an http or https URL."))
+            : !IsAcceptableUrl(form.ImageUrl)
+            ? Result.Invalid(new ValidationError(nameof(form.ImageUrl), "The image has to be an http or https URL."))
+            : Result.Success();
     }
 
-    private static bool IsAcceptableUrl(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return true;
-        }
-
-        return Uri.TryCreate(value.Trim(), UriKind.Absolute, out var uri)
-            && uri.Scheme is "http" or "https";
-    }
+    private static bool IsAcceptableUrl(string? value) => string.IsNullOrWhiteSpace(value) || (Uri.TryCreate(value.Trim(), UriKind.Absolute, out var uri)
+            && uri.Scheme is "http" or "https");
 
     private static string? NormalizeUrl(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
@@ -316,15 +296,9 @@ public sealed class WatchItemService(
     /// <summary>
     /// Coming-up titles first (soonest at the top), then titles with no date, then ones already out.
     /// </summary>
-    private static int Rank(WatchItemDto item, DateOnly today)
-    {
-        if (item.ReleaseDate is null)
-        {
-            return 1_000_000;
-        }
-
-        return item.ReleaseDate.Value >= today
+    private static int Rank(WatchItemDto item, DateOnly today) => item.ReleaseDate is null
+            ? 1_000_000
+            : item.ReleaseDate.Value >= today
             ? item.ReleaseDate.Value.DayNumber
             : 2_000_000 - item.ReleaseDate.Value.DayNumber;
-    }
 }

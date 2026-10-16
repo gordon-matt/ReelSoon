@@ -52,8 +52,8 @@ public static class DbInitializer
 
         var roles = new (string Name, string Description)[]
         {
-            (Constants.Roles.Administrator, "Manages the instance"),
-            (Constants.Roles.User, "Keeps their own watch lists"),
+            (WellKnownRoles.Administrator, "Manages the instance"),
+            (WellKnownRoles.User, "Keeps their own watch lists"),
         };
 
         foreach (var (name, description) in roles)
@@ -80,7 +80,7 @@ public static class DbInitializer
             return;
         }
 
-        var existing = await userManager.GetUsersInRoleAsync(Constants.Roles.Administrator);
+        var existing = await userManager.GetUsersInRoleAsync(WellKnownRoles.Administrator);
 
         if (existing.Count > 0)
         {
@@ -119,8 +119,8 @@ public static class DbInitializer
             return;
         }
 
-        await userManager.AddToRoleAsync(user, Constants.Roles.Administrator);
-        await userManager.AddToRoleAsync(user, Constants.Roles.User);
+        await userManager.AddToRoleAsync(user, WellKnownRoles.Administrator);
+        await userManager.AddToRoleAsync(user, WellKnownRoles.User);
 
         logger.LogWarning(
             "Seed administrator '{UserName}' was created from configuration. Change its password.",

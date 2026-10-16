@@ -1,9 +1,9 @@
 using Extenso.Data.Entity;
 using Hangfire;
 using Hangfire.PostgreSql;
+using LogVue.Data.Npgsql;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using LogVue.Data.Npgsql;
 
 namespace ReelSoon.Data.Npgsql;
 

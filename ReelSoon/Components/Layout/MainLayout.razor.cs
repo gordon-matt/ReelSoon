@@ -1,23 +1,18 @@
+using Heroicsoft.NetForge.Abstractions.Navigation;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Routing;
-using Microsoft.JSInterop;
+using Microsoft.Extensions.Options;
 
 namespace ReelSoon.Components.Layout;
 
-public partial class MainLayout : IAsyncDisposable
+public partial class MainLayout : IDisposable
 {
+    private const string BADGE_TONE = "nf-badge-muted";
+
+    [Inject]
+    private IOptions<ForgeShellOptions> ShellOptions { get; set; } = default!;
+
     [Inject]
     private NavigationManager Navigation { get; set; } = default!;
-
-    [Inject]
-    private IJSRuntime Js { get; set; } = default!;
-
-    [Inject]
-    private AuthenticationStateProvider AuthState { get; set; } = default!;
-
-    [Inject]
-    private IAuthProviderService Auth { get; set; } = default!;
 
     [Inject]
     private IWatchItemService WatchItems { get; set; } = default!;
@@ -28,99 +23,70 @@ public partial class MainLayout : IAsyncDisposable
     [Inject]
     private AppEvents Events { get; set; } = default!;
 
-    private bool sidebarOpen;
+    [Inject]
+    private SidebarRefresh Sidebar { get; set; } = default!;
+
+    private readonly CancellationTokenSource pollCts = new();
+    private ForgeShellOptions shell = new();
     private bool notificationsOpen;
-    private string theme = "light";
-    private string searchText = string.Empty;
-    private string userName = string.Empty;
-    private bool showSignOut;
-    private bool isAdministrator;
     private WatchListCounts? counts;
     private int unreadCount;
-    private PeriodicTimer? pollTimer;
-    private CancellationTokenSource? pollCts;
+
+    /// <summary>Pinned under a divider. Both dashboards live outside the Blazor router.</summary>
+    private static readonly ForgeNavItem[] AdminLinks =
+    [
+        new() { Title = "Jobs", Href = "/hangfire", Icon = "jobs", External = true },
+        new() { Title = "Logs", Href = "/logvue", Icon = "logs", External = true },
+    ];
+
+    /// <summary>The watch lists with their counts.</summary>
+    private IReadOnlyList<ForgeNavSection> Sections =>
+    [
+        new ForgeNavSection
+        {
+            Heading = "Watch lists",
+            Items =
+            [
+                .. MediaKinds.All.Select(kind => new ForgeNavItem
+                {
+                    Title = kind.Label(),
+                    Href = kind.Route(),
+                    Icon = kind.Icon(),
+                    Badge = counts?.For(kind).ToString(),
+                    BadgeCssClass = BADGE_TONE,
+                }),
+            ],
+        },
+    ];
 
     protected override async Task OnInitializedAsync()
     {
-        Navigation.LocationChanged += OnLocationChanged;
-        Events.ListsChanged += OnListsChanged;
+        shell = ShellOptions.Value;
+        Sidebar.Changed += OnSidebarChanged;
         Events.NotificationsChanged += OnNotificationsChanged;
 
-        var state = await AuthState.GetAuthenticationStateAsync();
-        userName = state.User.Identity?.Name ?? string.Empty;
-        showSignOut = Auth.Provider != AuthProvider.None;
-        isAdministrator = state.User.IsInRole(Constants.Roles.Administrator);
-
-        SyncSearchFromUri();
         await RefreshCountsAsync();
         await RefreshUnreadAsync();
 
-        pollCts = new CancellationTokenSource();
-        pollTimer = new PeriodicTimer(TimeSpan.FromSeconds(15));
         _ = PollUnreadAsync(pollCts.Token);
     }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            theme = await Js.InvokeAsync<string>("reelsoon.getTheme");
-            StateHasChanged();
-        }
-    }
-
-    private bool IsActive(MediaKind kind)
-    {
-        string path = CurrentPath();
-        return MediaKinds.TryFromRoute(path, out var current) && current == kind;
-    }
-
-    private void ToggleSidebar() => sidebarOpen = !sidebarOpen;
-
-    private void CloseSidebar() => sidebarOpen = false;
 
     private void ToggleNotifications() => notificationsOpen = !notificationsOpen;
 
     private void CloseNotifications() => notificationsOpen = false;
 
-    private async Task ToggleThemeAsync()
-    {
-        theme = theme == "dark" ? "light" : "dark";
-        await Js.InvokeVoidAsync("reelsoon.setTheme", theme);
-    }
+    private void Search(string term) =>
+        Navigation.NavigateTo($"{ListRoute()}?q={Uri.EscapeDataString(term)}");
 
-    private void Search()
-    {
-        string route = ListRoute();
-        string query = searchText.Trim();
-        Navigation.NavigateTo(query.Length == 0 ? route : $"{route}?q={Uri.EscapeDataString(query)}");
-        sidebarOpen = false;
-    }
-
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) =>
-        InvokeAsync(() =>
-        {
-            SyncSearchFromUri();
-            sidebarOpen = false;
-            StateHasChanged();
-        });
-
-    private void OnListsChanged() => InvokeAsync(RefreshCountsAsync);
+    private void OnSidebarChanged() => InvokeAsync(RefreshCountsAsync);
 
     private void OnNotificationsChanged() => InvokeAsync(RefreshUnreadAsync);
 
-    private void SyncSearchFromUri()
+    private string ListRoute()
     {
-        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-        searchText = query.TryGetValue("q", out var value) ? value.ToString() : string.Empty;
+        string path = Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0];
+        return MediaKinds.TryFromRoute(path, out var kind) ? kind.Route() : MediaKind.Movie.Route();
     }
-
-    private string CurrentPath() =>
-        Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0].Trim('/');
-
-    private string ListRoute() =>
-        MediaKinds.TryFromRoute(CurrentPath(), out var kind) ? kind.Route() : MediaKind.Movie.Route();
 
     private async Task RefreshCountsAsync()
     {
@@ -154,9 +120,11 @@ public partial class MainLayout : IAsyncDisposable
 
     private async Task PollUnreadAsync(CancellationToken cancellationToken)
     {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(15));
+
         try
         {
-            while (pollTimer is not null && await pollTimer.WaitForNextTickAsync(cancellationToken))
+            while (await timer.WaitForNextTickAsync(cancellationToken))
             {
                 await RefreshUnreadAsync();
             }
@@ -166,14 +134,11 @@ public partial class MainLayout : IAsyncDisposable
         }
     }
 
-    public async ValueTask DisposeAsync()
+    public void Dispose()
     {
-        Navigation.LocationChanged -= OnLocationChanged;
-        Events.ListsChanged -= OnListsChanged;
+        Sidebar.Changed -= OnSidebarChanged;
         Events.NotificationsChanged -= OnNotificationsChanged;
-        pollCts?.Cancel();
-        pollTimer?.Dispose();
-        pollCts?.Dispose();
-        await Task.CompletedTask;
+        pollCts.Cancel();
+        pollCts.Dispose();
     }
 }

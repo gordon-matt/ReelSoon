@@ -124,11 +124,11 @@ public partial class ItemDrawer : IDisposable
 
     private string PreviewStatusClass =>
         Preview is null || Preview.ReleaseDate is null
-            ? "rs-badge-muted"
-            : ReleaseText.IsReleased(Preview.ReleaseDate, Today) ? "rs-badge-success" : "rs-badge-upcoming";
+            ? "nf-badge-muted"
+            : ReleaseText.IsReleased(Preview.ReleaseDate, Today) ? "nf-badge-success" : "nf-badge-accent";
 
     private string StatusClass =>
         Item is null || Item.ReleaseDate is null
-            ? "rs-badge-muted"
-            : Item.IsReleased ? "rs-badge-success" : "rs-badge-upcoming";
+            ? "nf-badge-muted"
+            : Item.IsReleased ? "nf-badge-success" : "nf-badge-accent";
 }

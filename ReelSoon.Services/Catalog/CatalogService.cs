@@ -29,7 +29,7 @@ internal sealed class CatalogService(
 
         try
         {
-            IReadOnlyList<CatalogHit> hits = kind switch
+            var hits = kind switch
             {
                 MediaKind.Game => await SearchGamesAsync(term, cancellationToken),
                 _ => await SearchTmdbAsync(kind, term, cancellationToken),
@@ -58,7 +58,7 @@ internal sealed class CatalogService(
     {
         try
         {
-            CatalogHit? hit = source switch
+            var hit = source switch
             {
                 CatalogSource.Igdb => await igdb.GetAsync(externalId, cancellationToken),
                 _ => await tmdb.GetAsync(kind, externalId, cancellationToken),
@@ -106,27 +106,15 @@ internal sealed class CatalogService(
         }
     }
 
-    private async Task<IReadOnlyList<CatalogHit>> SearchTmdbAsync(MediaKind kind, string query, CancellationToken cancellationToken)
-    {
-        if (!tmdb.IsConfigured)
-        {
-            throw new CatalogRequestException(
-                "Movie and TV search needs a TMDB API key in Catalog:Tmdb:ApiKey. You can still add a title yourself.");
-        }
+    private async Task<IReadOnlyList<CatalogHit>> SearchTmdbAsync(MediaKind kind, string query, CancellationToken cancellationToken) => !tmdb.IsConfigured
+            ? throw new CatalogRequestException(
+                "Movie and TV search needs a TMDB API key in Catalog:Tmdb:ApiKey. You can still add a title yourself.")
+            : await tmdb.SearchMultiAsync(query, cancellationToken);
 
-        return await tmdb.SearchMultiAsync(query, cancellationToken);
-    }
-
-    private async Task<IReadOnlyList<CatalogHit>> SearchGamesAsync(string query, CancellationToken cancellationToken)
-    {
-        if (!igdb.IsConfigured)
-        {
-            throw new CatalogRequestException(
-                "Game search needs a Twitch client id and secret in Catalog:Igdb. You can still add a game yourself.");
-        }
-
-        return await igdb.SearchAsync(query, cancellationToken);
-    }
+    private async Task<IReadOnlyList<CatalogHit>> SearchGamesAsync(string query, CancellationToken cancellationToken) => !igdb.IsConfigured
+            ? throw new CatalogRequestException(
+                "Game search needs a Twitch client id and secret in Catalog:Igdb. You can still add a game yourself.")
+            : await igdb.SearchAsync(query, cancellationToken);
 
     private static bool IsTransportFailure(Exception ex, CancellationToken cancellationToken) =>
         ex is HttpRequestException || (ex is TaskCanceledException && !cancellationToken.IsCancellationRequested);

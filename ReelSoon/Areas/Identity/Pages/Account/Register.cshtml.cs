@@ -70,7 +70,7 @@ public class RegisterModel(
             return Page();
         }
 
-        await userManager.AddToRoleAsync(user, Constants.Roles.User);
+        await userManager.AddToRoleAsync(user, WellKnownRoles.User);
         logger.LogInformation("User {UserName} registered", user.UserName);
 
         await signInManager.SignInAsync(user, isPersistent: false);

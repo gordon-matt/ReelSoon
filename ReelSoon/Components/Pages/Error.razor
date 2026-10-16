@@ -1,9 +1,7 @@
 @page "/error"
 @layout EmptyLayout
 
-<PageTitle>Error — ReelSoon</PageTitle>
-
-<EmptyState IconName="alert" Title="Something went wrong">
-    <p>The error has been logged. Trying again often works — nothing you had saved is lost.</p>
-    <a class="rs-button rs-button-primary" href="/movies">Back to your lists</a>
-</EmptyState>
+<ErrorContent HomeHref="/movies"
+              HomeLabel="Back to your lists"
+              HomeIcon="film"
+              Message="The error has been logged. Trying again often works - nothing you had saved is lost." />

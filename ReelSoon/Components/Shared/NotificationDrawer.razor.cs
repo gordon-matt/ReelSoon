@@ -86,27 +86,15 @@ public partial class NotificationDrawer : IDisposable
         var now = Time.GetUtcNow().UtcDateTime;
         var delta = now - createdUtc;
 
-        if (delta.TotalMinutes < 1)
-        {
-            return "Just now";
-        }
-
-        if (delta.TotalHours < 1)
-        {
-            return $"{(int)delta.TotalMinutes}m ago";
-        }
-
-        if (delta.TotalDays < 1)
-        {
-            return $"{(int)delta.TotalHours}h ago";
-        }
-
-        if (delta.TotalDays < 7)
-        {
-            return $"{(int)delta.TotalDays}d ago";
-        }
-
-        return createdUtc.ToLocalTime().ToString("d MMM yyyy", System.Globalization.CultureInfo.CurrentCulture);
+        return delta.TotalMinutes < 1
+            ? "Just now"
+            : delta.TotalHours < 1
+            ? $"{(int)delta.TotalMinutes}m ago"
+            : delta.TotalDays < 1
+            ? $"{(int)delta.TotalHours}h ago"
+            : delta.TotalDays < 7
+            ? $"{(int)delta.TotalDays}d ago"
+            : createdUtc.ToLocalTime().ToString("d MMM yyyy", System.Globalization.CultureInfo.CurrentCulture);
     }
 
     public void Dispose() => Events.NotificationsChanged -= OnChanged;

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.WebUtilities;
-using ReelSoon.Components.Shared;
 using ReelSoon.Services.Catalog;
 
 namespace ReelSoon.Components.Pages;
@@ -26,6 +25,12 @@ public partial class Watch : IDisposable
 
     [Inject]
     private ToastService Toasts { get; set; } = default!;
+
+    [Inject]
+    private DialogService Dialogs { get; set; } = default!;
+
+    [Inject]
+    private SidebarRefresh Sidebar { get; set; } = default!;
 
     [Inject]
     private AppEvents Events { get; set; } = default!;
@@ -53,7 +58,6 @@ public partial class Watch : IDisposable
     private bool saving;
     private string? formError;
     private WatchItemForm form = new();
-    private ConfirmDialog confirm = default!;
 
     private List<CatalogHit> hits = [];
     private CatalogHit? preview;
@@ -473,7 +477,7 @@ public partial class Watch : IDisposable
             Toasts.Success($"Added {saved.Title}.");
         }
 
-        Events.RaiseListsChanged();
+        Sidebar.NotifyChanged();
         Events.RaiseNotificationsChanged();
         creating = false;
         editing = false;
@@ -506,7 +510,7 @@ public partial class Watch : IDisposable
             }
 
             Toasts.Success($"Added {created.Value.Title}.");
-            Events.RaiseListsChanged();
+            Sidebar.NotifyChanged();
             Events.RaiseNotificationsChanged();
             creating = false;
             editing = false;
@@ -534,7 +538,7 @@ public partial class Watch : IDisposable
         selected = updated.Value;
         editing = false;
         Toasts.Success("Saved.");
-        Events.RaiseListsChanged();
+        Sidebar.NotifyChanged();
         Events.RaiseNotificationsChanged();
     }
 
@@ -545,9 +549,11 @@ public partial class Watch : IDisposable
             return;
         }
 
-        bool confirmed = await confirm.ShowAsync(
+        bool confirmed = await Dialogs.ConfirmAsync(
             $"Remove {selected.Title}?",
-            "It leaves your list, and any release notification for it goes with it.");
+            "It leaves your list, and any release notification for it goes with it.",
+            "Remove",
+            isDestructive: true);
 
         if (!confirmed)
         {
@@ -562,7 +568,7 @@ public partial class Watch : IDisposable
         }
 
         Toasts.Success($"Removed {selected.Title}.");
-        Events.RaiseListsChanged();
+        Sidebar.NotifyChanged();
         Events.RaiseNotificationsChanged();
         creating = false;
         editing = false;
@@ -595,5 +601,5 @@ public partial class Watch : IDisposable
     }
 
     private static string StatusClass(WatchItemDto item) =>
-        item.ReleaseDate is null ? "rs-badge-muted" : item.IsReleased ? "rs-badge-success" : "rs-badge-upcoming";
+        item.ReleaseDate is null ? "nf-badge-muted" : item.IsReleased ? "nf-badge-success" : "nf-badge-accent";
 }

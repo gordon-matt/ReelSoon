@@ -1,45 +1,45 @@
-<aside class="rs-notify" aria-label="Notifications">
-    <header class="rs-details-head">
-        <div class="rs-details-title">
+<aside class="nf-drawer" aria-label="Notifications">
+    <header class="nf-drawer-head">
+        <div class="nf-drawer-title">
             <Icon Name="bell" />
             <strong>Notifications</strong>
         </div>
-        <button type="button" class="rs-icon-button" title="Close" @onclick="OnClose">
-            <Icon Name="x" />
-        </button>
+        <div class="nf-drawer-actions">
+            <button type="button" class="nf-icon-button" title="Close" @onclick="OnClose">
+                <Icon Name="x" />
+            </button>
+        </div>
     </header>
 
-    <div class="rs-details-body">
+    <div class="nf-drawer-body">
         @if (loading)
         {
-            <p class="rs-muted">Loading…</p>
+            <p class="nf-muted">Loading.</p>
         }
         else if (loadError is not null)
         {
-            <EmptyState IconName="alert" Title="Notifications could not be read">
-                @loadError
-            </EmptyState>
+            <EmptyState Icon="alert" Title="Notifications could not be read" Description="@loadError" />
         }
         else if (items.Count == 0)
         {
-            <EmptyState IconName="bell" Title="You're up to date">
-                <p>When a movie, show or game on your list is released, it shows up here.</p>
-            </EmptyState>
+            <EmptyState Icon="bell"
+                        Title="You're up to date"
+                        Description="When a movie, show or game on your list is released, it shows up here." />
         }
         else
         {
-            <ul class="rs-notify-list">
+            <ul class="reel-notices">
                 @foreach (var notice in items)
                 {
-                    <li class="rs-notify-item @(notice.IsUnread ? "is-unread" : null)" @key="notice.Id">
-                        <div class="rs-notify-copy">
+                    <li class="reel-notice @(notice.IsUnread ? "is-unread" : null)" @key="notice.Id">
+                        <div>
                             <strong>@notice.Title</strong>
                             <p>@notice.Message</p>
-                            <span class="rs-muted rs-small">@When(notice.CreatedAt)</span>
+                            <span class="nf-muted nf-small">@When(notice.CreatedAt)</span>
                         </div>
-                        <div class="rs-notify-actions">
-                            <button type="button" class="rs-button" @onclick="() => ViewAsync(notice)">View</button>
-                            <button type="button" class="rs-icon-button rs-danger-hover" title="Delete" @onclick="() => DeleteAsync(notice)">
+                        <div class="reel-notice-actions">
+                            <button type="button" class="nf-button" @onclick="() => ViewAsync(notice)">View</button>
+                            <button type="button" class="nf-icon-button nf-danger-hover" title="Delete" @onclick="() => DeleteAsync(notice)">
                                 <Icon Name="trash" />
                             </button>
                         </div>

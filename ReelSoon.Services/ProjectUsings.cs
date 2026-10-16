@@ -1,14 +1,11 @@
-global using System.Linq.Expressions;
 global using Ardalis.Result;
 global using Extenso.Data.Entity;
+global using Heroicsoft.NetForge.Abstractions.Auth;
+global using Heroicsoft.NetForge.Results;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
-global using ReelSoon;
-global using ReelSoon.Data;
 global using ReelSoon.Data.Entities;
 global using ReelSoon.Models;
-global using ReelSoon.Services;
-global using ReelSoon.Services.Auth;

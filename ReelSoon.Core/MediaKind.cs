@@ -51,12 +51,15 @@ public static class MediaKinds
             case "":
                 kind = MediaKind.Movie;
                 return true;
+
             case "tv":
                 kind = MediaKind.TvShow;
                 return true;
+
             case "games":
                 kind = MediaKind.Game;
                 return true;
+
             default:
                 kind = default;
                 return false;

@@ -2,9 +2,5 @@
 @layout EmptyLayout
 @attribute [AllowAnonymous]
 
-<PageTitle>Access denied — ReelSoon</PageTitle>
-
-<EmptyState IconName="alert" Title="You don't have access to this">
-    <p>Ask an administrator if you think you should.</p>
-    <a class="rs-button rs-button-primary" href="/movies">Back to your lists</a>
-</EmptyState>
+@* Qualified: the page is itself called AccessDenied. *@
+<Heroicsoft.NetForge.Components.AccessDenied HomeHref="/movies" HomeLabel="Back to your lists" />

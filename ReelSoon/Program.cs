@@ -1,12 +1,10 @@
 using Hangfire;
-using Hangfire.Dashboard;
 using LogVue;
-using ReelSoon.Components;
-using ReelSoon.Infrastructure;
-using ReelSoon.Services.Catalog;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.HttpOverrides;
+using ReelSoon.Components;
+using ReelSoon.Services.Catalog;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,8 +36,27 @@ builder.Services.AddHttpClient();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorization();
 
+// Scoped to the circuit: toasts, dialogs and sidebar refreshes stay with the user who caused them.
+// The stored key keeps an existing visitor's theme; the system default matches the old behaviour
+// of following the OS until a choice is made.
+builder.Services.AddNetForgeComponents(o =>
+{
+    o.ThemeStorageKey = ReelSoon.Constants.ClientThemeLocalStorageKey;
+    o.DefaultColorScheme = "system";
+    o.AccentColor = "#c026d3";
+    o.AccentColorDark = "#e879f9";
+});
+
+builder.Services.Configure<ForgeShellOptions>(shell =>
+{
+    shell.Brand = "ReelSoon";
+    shell.BrandHref = "/movies";
+    shell.LogoUrl = "img/Logo.png";
+    shell.MarkUrl = "img/Icon_Small.png";
+    shell.SearchPlaceholder = "Search this list";
+});
+
 builder.Services.AddScoped<AppEvents>();
-builder.Services.AddScoped<ToastService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddMemoryCache();
 builder.Services.Configure<CatalogOptions>(builder.Configuration.GetSection(CatalogOptions.SectionName));
@@ -90,12 +107,25 @@ app.UseAuthorization();
 
 app.MapLogVue().RequireAuthorization(new AuthorizeAttribute
 {
-    Roles = ReelSoon.Constants.Roles.Administrator
+    Roles = WellKnownRoles.Administrator
 });
 
 app.UseHangfireDashboard("/hangfire", new DashboardOptions
 {
-    Authorization = [new HangfireAuthorizationFilter()],
+    Authorization = [new AdministratorDashboardAuthorizationFilter()],
+});
+
+app.Use(async (context, next) =>
+{
+    // Home.razor also sends "/" to the movie list, but NavigateTo during prerender throws
+    // NavigationException and the circuit logs it. Redirect the document request first.
+    if (HttpMethods.IsGet(context.Request.Method) && context.Request.Path == "/")
+    {
+        context.Response.Redirect(MediaKind.Movie.Route());
+        return;
+    }
+
+    await next(context);
 });
 
 app.MapRazorComponents<App>()
