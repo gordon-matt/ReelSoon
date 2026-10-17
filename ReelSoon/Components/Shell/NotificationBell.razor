@@ -1,0 +1,18 @@
+<button type="button"
+        class="nf-icon-button @(open ? "is-active" : null)"
+        title="Notifications"
+        aria-label="Notifications"
+        aria-expanded="@(open ? "true" : "false")"
+        @onclick="Toggle">
+    <Icon Name="bell" />
+    @if (unreadCount > 0)
+    {
+        <span class="nf-badge-count">@(unreadCount > 9 ? "9+" : unreadCount.ToString())</span>
+    }
+</button>
+
+@if (open)
+{
+    <div class="nf-drawer-scrim" @onclick="Close"></div>
+    <NotificationDrawer OnClose="Close" />
+}

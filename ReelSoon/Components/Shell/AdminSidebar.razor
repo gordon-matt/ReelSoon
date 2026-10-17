@@ -1,0 +1,19 @@
+@using Heroicsoft.NetForge.Abstractions.Navigation
+
+@* Pinned under a divider. Both dashboards live outside the Blazor router. *@
+<AuthorizeView Roles="@WellKnownRoles.Administrator">
+    <ul class="nf-nav" aria-label="Administration">
+        @foreach (var item in Links)
+        {
+            <ForgeNavLink Item="item" />
+        }
+    </ul>
+</AuthorizeView>
+
+@code {
+    private static readonly ForgeNavItem[] Links =
+    [
+        new() { Title = "Jobs", Href = "/hangfire", Icon = "jobs", External = true, Tooltip = "Background jobs" },
+        new() { Title = "Logs", Href = "/logvue", Icon = "logs", External = true, Tooltip = "Log viewer" },
+    ];
+}

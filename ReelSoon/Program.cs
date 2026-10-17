@@ -3,7 +3,9 @@ using LogVue;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.HttpOverrides;
+using Heroicsoft.NetForge.Components.Shell;
 using ReelSoon.Components;
+using ReelSoon.Infrastructure;
 using ReelSoon.Services.Catalog;
 using Serilog;
 
@@ -54,7 +56,10 @@ builder.Services.Configure<ForgeShellOptions>(shell =>
     shell.LogoUrl = "img/Logo.png";
     shell.MarkUrl = "img/Icon_Small.png";
     shell.SearchPlaceholder = "Search this list";
+    shell.TopbarEndComponent = typeof(ReelSoon.Components.Shell.NotificationBell);
+    shell.SidebarFooterComponent = typeof(ReelSoon.Components.Shell.AdminSidebar);
 });
+builder.Services.AddScoped<IShellNavigation, ReelSoonNavigation>();
 
 builder.Services.AddScoped<AppEvents>();
 builder.Services.AddSingleton(TimeProvider.System);

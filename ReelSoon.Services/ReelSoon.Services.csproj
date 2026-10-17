@@ -9,8 +9,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="Ardalis.Result" Version="10.1.0" />
-		<PackageReference Include="Heroicsoft.NetForge.Abstractions" Version="1.0.1" />
-		<PackageReference Include="Heroicsoft.NetForge.Results" Version="1.0.1" />
+		<PackageReference Include="Heroicsoft.NetForge.Abstractions" Version="1.0.3-beta" />
+		<PackageReference Include="Heroicsoft.NetForge.Results" Version="1.0.3-beta" />
 		<PackageReference Include="LinqKit.Core" Version="1.2.11" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.12" />
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.9" />

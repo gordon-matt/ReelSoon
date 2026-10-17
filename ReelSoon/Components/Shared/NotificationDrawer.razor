@@ -28,16 +28,16 @@
         }
         else
         {
-            <ul class="reel-notices">
+            <ul class="nf-notices">
                 @foreach (var notice in items)
                 {
-                    <li class="reel-notice @(notice.IsUnread ? "is-unread" : null)" @key="notice.Id">
+                    <li class="nf-notice @(notice.IsUnread ? "is-unread" : null)" @key="notice.Id">
                         <div>
                             <strong>@notice.Title</strong>
                             <p>@notice.Message</p>
                             <span class="nf-muted nf-small">@When(notice.CreatedAt)</span>
                         </div>
-                        <div class="reel-notice-actions">
+                        <div class="nf-notice-actions">
                             <button type="button" class="nf-button" @onclick="() => ViewAsync(notice)">View</button>
                             <button type="button" class="nf-icon-button nf-danger-hover" title="Delete" @onclick="() => DeleteAsync(notice)">
                                 <Icon Name="trash" />

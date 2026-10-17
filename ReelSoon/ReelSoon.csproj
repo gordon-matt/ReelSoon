@@ -18,11 +18,9 @@
 	<ItemGroup>
 		<PackageReference Include="Ardalis.Result" Version="10.1.0" />
 		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
-		<PackageReference Include="Heroicsoft.NetForge.Abstractions" Version="1.0.1" />
-		<PackageReference Include="Heroicsoft.NetForge.Authentication" Version="1.0.1" />
-		<PackageReference Include="Heroicsoft.NetForge.Components" Version="1.0.1" />
-		<PackageReference Include="Heroicsoft.NetForge.Hangfire" Version="1.0.1" />
-		<PackageReference Include="Heroicsoft.NetForge.Results" Version="1.0.1" />
+		<PackageReference Include="Heroicsoft.NetForge.Authentication" Version="1.0.3-beta" />
+		<PackageReference Include="Heroicsoft.NetForge.Components" Version="1.0.3-beta" />
+		<PackageReference Include="Heroicsoft.NetForge.Hangfire" Version="1.0.3-beta" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.12" />
 		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.12" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.12" />

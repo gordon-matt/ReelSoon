@@ -54,14 +54,14 @@
     }
     else
     {
-        <div class="reel-grid" role="list">
+        <div class="nf-poster-grid" role="list">
             @foreach (var item in visible)
             {
                 <button type="button"
-                        class="reel-card @(selected?.Id == item.Id && !creating ? "is-selected" : null)"
+                        class="nf-poster-card @(selected?.Id == item.Id && !creating ? "is-selected" : null)"
                         @onclick="() => Open(item)"
                         @key="item.Id">
-                    <span class="reel-card-cover">
+                    <span class="nf-poster-cover">
                         @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
                         {
                             <img src="@item.ImageUrl" alt="" />
@@ -72,7 +72,7 @@
                         }
                         <span class="nf-badge @StatusClass(item)">@ReleaseText.Status(item.ReleaseDate, Today)</span>
                     </span>
-                    <span class="reel-card-title">@item.Title</span>
+                    <span class="nf-poster-title">@item.Title</span>
                     <span class="nf-muted nf-small">@ReleaseText.Relative(item.ReleaseDate, Today)</span>
                 </button>
             }
