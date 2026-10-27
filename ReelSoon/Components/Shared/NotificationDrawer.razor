@@ -1,17 +1,9 @@
-<aside class="nf-drawer" aria-label="Notifications">
-    <header class="nf-drawer-head">
-        <div class="nf-drawer-title">
-            <Icon Name="bell" />
-            <strong>Notifications</strong>
-        </div>
-        <div class="nf-drawer-actions">
-            <button type="button" class="nf-icon-button" title="Close" @onclick="OnClose">
-                <Icon Name="x" />
-            </button>
-        </div>
-    </header>
-
-    <div class="nf-drawer-body">
+<Drawer AriaLabel="Notifications" Scrim="true" OnClose="OnClose">
+    <TitleContent>
+        <Icon Name="bell" />
+        <strong>Notifications</strong>
+    </TitleContent>
+    <ChildContent>
         @if (loading)
         {
             <p class="nf-muted">Loading.</p>
@@ -47,5 +39,5 @@
                 }
             </ul>
         }
-    </div>
-</aside>
+    </ChildContent>
+</Drawer>

@@ -3,9 +3,7 @@ using LogVue;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.HttpOverrides;
-using Heroicsoft.NetForge.Components.Shell;
 using ReelSoon.Components;
-using ReelSoon.Infrastructure;
 using ReelSoon.Services.Catalog;
 using Serilog;
 

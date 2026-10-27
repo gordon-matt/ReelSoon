@@ -1,6 +1,4 @@
 using Heroicsoft.NetForge.Abstractions.Navigation;
-using Heroicsoft.NetForge.Components.Shell;
-using ReelSoon.Services.WatchItems;
 
 namespace ReelSoon.Infrastructure;
 

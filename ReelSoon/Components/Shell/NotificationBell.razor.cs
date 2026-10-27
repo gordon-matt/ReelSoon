@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Components;
-using ReelSoon.Infrastructure;
-using ReelSoon.Services.Notifications;
 
 namespace ReelSoon.Components.Shell;
 

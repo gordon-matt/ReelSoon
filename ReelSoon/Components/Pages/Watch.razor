@@ -16,11 +16,11 @@
 
     @if (!loading && loadError is null && items.Count > 0)
     {
-        <div class="nf-chip-row reel-filters" role="tablist">
-            <button type="button" class="nf-chip @(filter == ListFilter.All ? "is-active" : null)" @onclick="() => filter = ListFilter.All">All</button>
-            <button type="button" class="nf-chip @(filter == ListFilter.Upcoming ? "is-active" : null)" @onclick="() => filter = ListFilter.Upcoming">Coming up</button>
-            <button type="button" class="nf-chip @(filter == ListFilter.Released ? "is-active" : null)" @onclick="() => filter = ListFilter.Released">Released</button>
-        </div>
+        <ChipGroup Class="reel-filters" Role="tablist">
+            <Chip Selected="@(filter == ListFilter.All)" OnClick="@(() => { filter = ListFilter.All; })">All</Chip>
+            <Chip Selected="@(filter == ListFilter.Upcoming)" OnClick="@(() => { filter = ListFilter.Upcoming; })">Coming up</Chip>
+            <Chip Selected="@(filter == ListFilter.Released)" OnClick="@(() => { filter = ListFilter.Released; })">Released</Chip>
+        </ChipGroup>
     }
 
     @if (loading)

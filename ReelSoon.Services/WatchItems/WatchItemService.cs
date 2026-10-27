@@ -247,14 +247,9 @@ public sealed class WatchItemService(
             : Result<WatchItem>.Success(item);
     }
 
-    private static Result Validate(WatchItemForm form)
-    {
-        if (string.IsNullOrWhiteSpace(form.Title))
-        {
-            return Result.Invalid(new ValidationError(nameof(form.Title), "Give it a title."));
-        }
-
-        return form.Title.Trim().Length > Constants.MaxLengths.Title
+    private static Result Validate(WatchItemForm form) => string.IsNullOrWhiteSpace(form.Title)
+            ? Result.Invalid(new ValidationError(nameof(form.Title), "Give it a title."))
+            : form.Title.Trim().Length > Constants.MaxLengths.Title
             ? Result.Invalid(new ValidationError(nameof(form.Title), "That title is too long."))
             : form.Notes is { Length: > Constants.MaxLengths.Notes }
             ? Result.Invalid(new ValidationError(nameof(form.Notes), "Those notes are too long."))
@@ -263,7 +258,6 @@ public sealed class WatchItemService(
             : !IsAcceptableUrl(form.ImageUrl)
             ? Result.Invalid(new ValidationError(nameof(form.ImageUrl), "The image has to be an http or https URL."))
             : Result.Success();
-    }
 
     private static bool IsAcceptableUrl(string? value) => string.IsNullOrWhiteSpace(value) || (Uri.TryCreate(value.Trim(), UriKind.Absolute, out var uri)
             && uri.Scheme is "http" or "https");

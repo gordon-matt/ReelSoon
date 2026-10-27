@@ -4,20 +4,20 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>1.0.1</Version>
+		<Version>1.1.0</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Ardalis.Result" Version="10.1.0" />
-		<PackageReference Include="Heroicsoft.NetForge.Abstractions" Version="1.0.3-beta" />
-		<PackageReference Include="Heroicsoft.NetForge.Results" Version="1.0.3-beta" />
+		<PackageReference Include="Heroicsoft.NetForge.Abstractions" Version="1.1.0" />
+		<PackageReference Include="Heroicsoft.NetForge.Results" Version="1.1.0" />
 		<PackageReference Include="LinqKit.Core" Version="1.2.11" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.12" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.13" />
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.9" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.12" />
-		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
-		<PackageReference Include="Microsoft.Extensions.Options" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.13" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.13" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.13" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="10.0.13" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -25,5 +25,4 @@
 		<ProjectReference Include="..\ReelSoon.Data\ReelSoon.Data.csproj" />
 		<ProjectReference Include="..\ReelSoon.Models\ReelSoon.Models.csproj" />
 	</ItemGroup>
-
 </Project>

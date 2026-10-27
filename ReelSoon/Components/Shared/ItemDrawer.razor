@@ -1,38 +1,32 @@
-<aside class="nf-drawer" aria-label="@(Creating ? "Add title" : Item?.Title)">
-    <header class="nf-drawer-head">
-        <div class="nf-drawer-title">
-            @if (Preview is not null)
-            {
-                <span class="nf-badge @PreviewStatusClass">@ReleaseText.Status(Preview.ReleaseDate, Today)</span>
-                <strong>@Preview.Title</strong>
-            }
-            else if (Creating)
-            {
-                <span>New @Kind.Singular().ToLowerInvariant()</span>
-            }
-            else if (Item is not null)
-            {
-                <span class="nf-badge @StatusClass">@ReleaseText.Status(Item.ReleaseDate, Today)</span>
-                <strong>@Item.Title</strong>
-            }
-        </div>
-        <div class="nf-drawer-actions">
-            @if (Item is not null && !Editing)
-            {
-                <button type="button" class="nf-icon-button" title="Edit" @onclick="OnEdit">
-                    <Icon Name="edit" />
-                </button>
-                <button type="button" class="nf-icon-button nf-danger-hover" title="Remove" @onclick="OnDelete">
-                    <Icon Name="trash" />
-                </button>
-            }
-            <button type="button" class="nf-icon-button" title="Close" @onclick="OnClose">
-                <Icon Name="x" />
+<Drawer AriaLabel="@(Creating ? "Add title" : Item?.Title)" BodyClass="reel-drawer-body" OnClose="OnClose">
+    <TitleContent>
+        @if (Preview is not null)
+        {
+            <span class="nf-badge @PreviewStatusClass">@ReleaseText.Status(Preview.ReleaseDate, Today)</span>
+            <strong>@Preview.Title</strong>
+        }
+        else if (Creating)
+        {
+            <span>New @Kind.Singular().ToLowerInvariant()</span>
+        }
+        else if (Item is not null)
+        {
+            <span class="nf-badge @StatusClass">@ReleaseText.Status(Item.ReleaseDate, Today)</span>
+            <strong>@Item.Title</strong>
+        }
+    </TitleContent>
+    <Actions>
+        @if (Item is not null && !Editing)
+        {
+            <button type="button" class="nf-icon-button" title="Edit" @onclick="OnEdit">
+                <Icon Name="edit" />
             </button>
-        </div>
-    </header>
-
-    <div class="nf-drawer-body reel-drawer-body">
+            <button type="button" class="nf-icon-button nf-danger-hover" title="Remove" @onclick="OnDelete">
+                <Icon Name="trash" />
+            </button>
+        }
+    </Actions>
+    <ChildContent>
         @if (Creating && Preview is not null)
         {
             @if (!string.IsNullOrWhiteSpace(Preview.ImageUrl))
@@ -107,8 +101,7 @@
         }
         else if (Creating)
         {
-            <div class="nf-field">
-                <label for="catalog-query">Search</label>
+            <Field Label="Search" For="catalog-query">
                 <input id="catalog-query"
                        class="nf-input"
                        value="@query"
@@ -117,7 +110,7 @@
                        autocomplete="off"
                        autofocus />
                 <span class="nf-hint">@SearchHint</span>
-            </div>
+            </Field>
 
             @if (Searching)
             {
@@ -181,35 +174,30 @@
                     <p class="nf-hint">The title, date, image, and description are refreshed from the catalog once a day. Notes stay yours.</p>
                 }
 
-                <div class="nf-field">
-                    <label for="title">Title</label>
+                <Field Label="Title" For="title">
                     <InputText id="title" class="nf-input" @bind-Value="Form.Title" autofocus />
                     <ValidationMessage For="() => Form.Title" class="nf-validation" />
-                </div>
+                </Field>
 
-                <div class="nf-field">
-                    <label for="release">Release date</label>
+                <Field Label="Release date" For="release">
                     <InputDate id="release" class="nf-input" @bind-Value="Form.ReleaseDate" />
                     <span class="nf-hint">Leave this empty if you don't know it yet. You'll be notified on this day.</span>
-                </div>
+                </Field>
 
-                <div class="nf-field">
-                    <label for="notes">Notes</label>
+                <Field Label="Notes" For="notes">
                     <InputTextArea id="notes" class="nf-textarea" @bind-Value="Form.Notes" />
                     <ValidationMessage For="() => Form.Notes" class="nf-validation" />
-                </div>
+                </Field>
 
-                <div class="nf-field">
-                    <label for="link">Link</label>
+                <Field Label="Link" For="link">
                     <InputText id="link" class="nf-input" @bind-Value="Form.LinkUrl" placeholder="https://" />
                     <ValidationMessage For="() => Form.LinkUrl" class="nf-validation" />
-                </div>
+                </Field>
 
-                <div class="nf-field">
-                    <label for="image">Image URL</label>
+                <Field Label="Image URL" For="image">
                     <InputText id="image" class="nf-input" @bind-Value="Form.ImageUrl" placeholder="https://" />
                     <ValidationMessage For="() => Form.ImageUrl" class="nf-validation" />
-                </div>
+                </Field>
 
                 <div class="nf-form-actions">
                     <button type="button" class="nf-button" @onclick="OnCancelEdit" disabled="@Saving">Cancel</button>
@@ -288,5 +276,5 @@
                 </section>
             }
         }
-    </div>
-</aside>
+    </ChildContent>
+</Drawer>
