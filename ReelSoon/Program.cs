@@ -1,4 +1,5 @@
 using Hangfire;
+using Heroicsoft.NetForge.Components.Navigation;
 using LogVue;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections;
@@ -45,6 +46,7 @@ builder.Services.AddNetForgeComponents(o =>
     o.DefaultColorScheme = "system";
     o.AccentColor = "#c026d3";
     o.AccentColorDark = "#e879f9";
+    o.ActiveSharedMenuPlacement = NetForgeMenuPlacement.Sidebar;
 });
 
 builder.Services.Configure<ForgeShellOptions>(shell =>
@@ -53,10 +55,29 @@ builder.Services.Configure<ForgeShellOptions>(shell =>
     shell.BrandHref = "/movies";
     shell.LogoUrl = "img/Logo.png";
     shell.MarkUrl = "img/Icon_Small.png";
+    shell.UseSharedMenu = true;
+    shell.SharedMenuName = "Admin";
     shell.SearchPlaceholder = "Search this list";
     shell.TopbarEndComponent = typeof(ReelSoon.Components.Shell.NotificationBell);
     shell.SidebarFooterComponent = typeof(ReelSoon.Components.Shell.AdminSidebar);
 });
+builder.Services.BuildMenu("Admin", menu =>
+{
+    menu.AddItems()
+        .AsTopbar()
+        .AddCustom(item =>
+        {
+            item.Title = "Home";
+            item.Icon = "home";
+            item.Url = "/";
+            item.MatchAll = true;
+        });
+
+    menu.AddItems(group => group.Roles = WellKnownRoles.Administrator)
+        .AsTopbar()
+        .AddLogVue(options => options.Title = "Logs");
+});
+
 builder.Services.AddScoped<IShellNavigation, ReelSoonNavigation>();
 
 builder.Services.AddScoped<AppEvents>();
