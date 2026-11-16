@@ -49,6 +49,8 @@ builder.Services.AddNetForgeComponents(o =>
     o.ActiveSharedMenuPlacement = NetForgeMenuPlacement.Sidebar;
 });
 
+builder.Services.ConfigureNetForgeToastSounds(sounds => sounds.EnableSounds = true);
+
 builder.Services.Configure<ForgeShellOptions>(shell =>
 {
     shell.Brand = "ReelSoon";
