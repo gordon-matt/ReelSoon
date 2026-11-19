@@ -126,6 +126,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.MapStaticAssets();
 
+app.MapNetForgeAssets();
+
 app.UseAntiforgery();
 
 app.UseAuthentication();
